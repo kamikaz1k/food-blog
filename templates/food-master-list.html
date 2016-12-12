@@ -12,11 +12,7 @@
         <div class="header">
             <nav>
                 <ul class="nav nav-pills pull-right">
-                    <li role="presentation" class="active"><a href="#">Home</a>
-                    </li>
-                    <li role="presentation"><a href="showSignIn">Sign In</a>
-                    </li>
-                    <li role="presentation"><a href="showSignUp">Sign Up</a>
+                    <li role="presentation"><a href="/">Home</a>
                     </li>
                 </ul>
             </nav>
@@ -32,15 +28,15 @@
             <a href="{{"/detail/" + entry[0]}}" class="list-group-item">
                 <h4 class="list-group-item-heading"></h4>
                 <p class="list-group-item-text">
-                    INSTA_ID {{entry[0]}}<br>
-                    INSTA_TEXT {{entry[1]}}<br>
-                    INSTA_LOC_ID {{entry[2]}}<br>
-                    INSTA_IMG_FULL {{entry[3]}}<br>
-                    IMAGE_IMG_THUMB {{entry[4]}}<br>
-                    USERNAME {{entry[5]}}<br>
-                    INSTA_POST_DATE {{entry[6]}}<br>
-                    FOOD_NAME {{entry[7]}}<br>
-                    INSTA_LOC_NAME {{entry[8]}}<br>
+                    <b>INSTA_ID</b> {{entry[0]}}<br>
+                    <b>INSTA_TEXT</b> {{entry[1]}}<br>
+                    <b>INSTA_LOC_ID</b> {{entry[2]}}<br>
+                    <b>INSTA_IMG_FULL</b> {{entry[3]}}<br>
+                    <b>IMAGE_IMG_THUMB</b> {{entry[4]}}<br>
+                    <b>USERNAME</b> {{entry[5]}}<br>
+                    <b>INSTA_POST_DATE</b> {{entry[6]}}<br>
+                    <b>FOOD_NAME</b> {{entry[7]}}<br>
+                    <b>INSTA_LOC_NAME</b> {{entry[8]}}<br>
                 </p>
             </a>
             {% endfor %}
