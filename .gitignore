@@ -1,3 +1,4 @@
 /instagram-scraper
 .DS_Store
 config.json
+.env

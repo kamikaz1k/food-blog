@@ -1,6 +1,7 @@
 from flask import Flask, render_template, json, request, redirect, session
 from flask.ext.mysql import MySQL
 from werkzeug import generate_password_hash, check_password_hash
+import os
 
 # from pprint import pprint
 
@@ -15,10 +16,10 @@ with open('config.json') as data_file:
 app.secret_key = config["secret_key"]
 
 # MySQL configurations
-app.config['MYSQL_DATABASE_USER'] = config["username"]
-app.config['MYSQL_DATABASE_PASSWORD'] = config["password"]
-app.config['MYSQL_DATABASE_DB'] = 'FOOD_BLOG'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+app.config['MYSQL_DATABASE_USER'] = os.environ['db_username'] # config["username"]
+app.config['MYSQL_DATABASE_PASSWORD'] = os.environ['db_password'] # config["password"]
+app.config['MYSQL_DATABASE_DB'] = os.environ['db_name'] # 'FOOD_BLOG'
+app.config['MYSQL_DATABASE_HOST'] = os.environ['db_host'] # 'localhost'
 
 mysql = MySQL()
 mysql.init_app(app)
