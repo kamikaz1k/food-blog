@@ -1,4 +1,4 @@
-from flask import Flask, render_template, json, request, redirect, session
+from flask import Flask, render_template, json, request, redirect, session, url_for
 from flask.ext.mysql import MySQL
 from werkzeug import generate_password_hash, check_password_hash
 import os
@@ -100,7 +100,8 @@ def add_item_to_table(item):
 # Routing Definitions
 @app.route("/")
 def main():
-    return render_template("index.html")
+    # return render_template("index.html")
+    return redirect(url_for('list'))
 
 @app.route("/list")
 def list():
