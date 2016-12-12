@@ -133,6 +133,7 @@ def detail(insta_id):
     return render_template("food-master-edit.html", post=post, msg=insta_id)
 
 if __name__ == "__main__":
-    app.run()
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
     # create_tables()
     # populate_table()
