@@ -62,8 +62,8 @@ def populate_table():
     conn = mysql.connect()
     cursor = conn.cursor()
     result = cursor.execute("SELECT * FROM FOOD_POSTS")
-    print result, str(cursor.fetchall())
-    print "populate_table complete"
+    # print result, str(cursor.fetchall())
+    # print "populate_table complete"
     cursor.close()
     conn.close()
 
@@ -72,6 +72,7 @@ def add_item_to_table(item):
         INSTA_ID = item["id"]
         INSTA_TEXT = item["caption"]["text"]
         # INSTA_LOC_ID = item.location.id
+        INSTA_LOC_NAME = item["location"]["name"]
         INSTA_IMG_FULL = item["images"]["standard_resolution"]["url"]
         IMAGE_IMG_THUMB = item["images"]["thumbnail"]["url"]
         USERNAME = item["user"]["username"]
@@ -80,7 +81,42 @@ def add_item_to_table(item):
         # print "Item INFO:",INSTA_ID,INSTA_TEXT,INSTA_IMG_FULL,IMAGE_IMG_THUMB,USERNAME,INSTA_POST_DATE
         conn = mysql.connect()
         cursor = conn.cursor()
-        result = cursor.execute("INSERT INTO FOOD_POSTS (INSTA_ID, INSTA_TEXT, INSTA_IMG_FULL, IMAGE_IMG_THUMB, USERNAME, INSTA_POST_DATE) VALUES (%s, %s, %s, %s, %s, FROM_UNIXTIME(%s))", (INSTA_ID,INSTA_TEXT,INSTA_IMG_FULL,IMAGE_IMG_THUMB,USERNAME,INSTA_POST_DATE))
+        result = cursor.execute("INSERT INTO FOOD_POSTS (INSTA_ID, INSTA_TEXT, INSTA_IMG_FULL, IMAGE_IMG_THUMB, USERNAME, INSTA_POST_DATE, INSTA_LOC_NAME) VALUES (%s, %s, %s, %s, %s, FROM_UNIXTIME(%s),%s)", (INSTA_ID,INSTA_TEXT,INSTA_IMG_FULL,IMAGE_IMG_THUMB,USERNAME,INSTA_POST_DATE,INSTA_LOC_NAME))
+        conn.commit()
+        print "Inserted "+INSTA_ID, result, str(cursor.fetchall())
+        
+    except Exception as e:
+        print "Exception!" + str(e)
+
+    finally:
+        try:
+            cursor.close()
+        except NameError:
+            print "Name Error for cursor"
+        try:
+            conn.close()
+        except NameError:
+            print "Name Error for conn"
+
+def populate_locations():
+    # Open JSON file
+    with open('json_output.json') as data_file: 
+        posts = json.load(data_file)
+        # Loop through posts and add them to DB
+        for item in posts:
+            add_location_to_item(item)
+            print item["id"] + " updated"
+
+
+def add_location_to_item(item):
+    try:
+        INSTA_ID = item["id"]
+        INSTA_LOC_NAME = item["location"]["name"]
+
+        # print "Item INFO:",INSTA_ID,INSTA_TEXT,INSTA_IMG_FULL,IMAGE_IMG_THUMB,USERNAME,INSTA_POST_DATE
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        result = cursor.execute("UPDATE FOOD_POSTS SET INSTA_LOC_NAME=%s WHERE INSTA_ID=%s", (INSTA_LOC_NAME, INSTA_ID))
         conn.commit()
         print "Inserted "+INSTA_ID, result, str(cursor.fetchall())
         
@@ -116,7 +152,7 @@ def list():
         cursor.close()
         conn.close()
 
-    return render_template("food-master-list.html", posts=posts, msg="MSG:::"+str(posts))
+    return render_template("food-master-list.html", posts=posts)#, msg="MSG:::"+str(posts))
 
 @app.route("/detail/<insta_id>")
 def detail(insta_id):
@@ -132,8 +168,13 @@ def detail(insta_id):
         conn.close()
     return render_template("food-master-edit.html", post=post[0], msg=insta_id)
 
+# @app.route("/save/<insta_id>")
+# def save(insta_id):
+    # try 
+
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
     # create_tables()
     # populate_table()
+    # populate_locations()
