@@ -168,9 +168,29 @@ def detail(insta_id):
         conn.close()
     return render_template("food-master-edit.html", post=post[0], msg=insta_id)
 
-# @app.route("/save/<insta_id>")
-# def save(insta_id):
-    # try 
+@app.route("/save/<insta_id>", methods=["POST"])
+def save(insta_id):
+    # Get all the form details
+    # Only need to update FOOD_NAME and INSTA_LOC_NAME
+    FOOD_NAME = request.form['FOOD_NAME']
+    INSTA_LOC_NAME = request.form['INSTA_LOC_NAME']
+
+    if insta_id and FOOD_NAME and INSTA_LOC_NAME:
+        try:
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            result = cursor.execute("UPDATE FOOD_POSTS SET FOOD_NAME=%s,INSTA_LOC_NAME=%s WHERE INSTA_ID=%s", [FOOD_NAME,INSTA_LOC_NAME,insta_id])
+            post = cursor.fetchall()
+            conn.commit()
+            return redirect(url_for("list"))
+            # return render_template("error.html", title="Save SUCCESS", msg=str(post))
+        except Exception as e:
+            return render_template("error.html", title="QUERY Error", msg=str(e))
+        finally:
+            cursor.close()
+            conn.close()
+    else:
+        return render_template("error.html", title="FORM Error", msg="Either the insta_id or FOOD_NAME or INSTA_LOC_NAME was missing")
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
