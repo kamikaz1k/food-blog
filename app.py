@@ -130,7 +130,7 @@ def detail(insta_id):
     finally:
         cursor.close()
         conn.close()
-    return render_template("food-master-edit.html", post=post, msg=insta_id)
+    return render_template("food-master-edit.html", post=post[0], msg=insta_id)
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
