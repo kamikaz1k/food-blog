@@ -12,92 +12,78 @@
         <div class="header">
             <nav>
                 <ul class="nav nav-pills pull-right">
-                    <li role="presentation" class="active"><a href="#">Home</a>
-                    </li>
-                    <li role="presentation"><a href="showSignIn">Sign In</a>
-                    </li>
-                    <li role="presentation"><a href="showSignUp">Sign Up</a>
+                    <li role="presentation"><a href="/">Home</a>
                     </li>
                 </ul>
             </nav>
             <h3 class="text-muted">Food Blog</h3>
         </div>
-
-        <!-- <div>
-            Details about food
-            <ul>
-                {% for detail in post %}
-                <li>{{ detail }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-        <p>{{msg}}</p> -->
     </div>
 
     <div class="container">
         <h2>
             Details about food
         </h2>
-        <form class="form-horizontal">
+        <form class="form-horizontal" action="/save/{{post[0]}}" method="post">
 
         <div class="form-group">
           <label for="post-id" class="col-sm-2 control-label">INSTA_ID:</label>
           <div class="col-sm-10">
-            <input type="text" class="form-control" name="title" id="post-id" value="{{post[0]}}" disabled>
+            <input type="text" class="form-control" name="INSTA_ID" id="post-id" value="{{post[0]}}" disabled>
           </div>
         </div>
         <div class="form-group">
           <label for="post-name" class="col-sm-2 control-label">FOOD_NAME:</label>
           <div class="col-sm-10">
-            <input type="text" class="form-control" name="title" id="post-name" value="{{post[7]}}">
+            <input type="text" class="form-control" name="FOOD_NAME" id="post-name" value="{{post[7]}}">
           </div>
         </div>
         <div class="form-group">
           <label for="post-text" class="col-sm-2 control-label">INSTA_TEXT:</label>
           <div class="col-sm-10">
-            <input type="text" class="form-control" name="title" id="post-text" value="{{post[1]}}" disabled>
+            <input type="text" class="form-control" name="INSTA_TEXT" id="post-text" value="{{post[1]}}" disabled>
           </div>
         </div>
         <div class="form-group">
           <label for="post-location-id" class="col-sm-2 control-label">INSTA_LOC_ID:</label>
           <div class="col-sm-10">
-            <input type="text" class="form-control" name="title" id="post-location-id" value="{{post[2]}}" disabled>
+            <input type="text" class="form-control" name="INSTA_LOC_ID" id="post-location-id" value="{{post[2]}}" disabled>
           </div>
         </div>
         <div class="form-group">
           <label for="post-location" class="col-sm-2 control-label">INSTA_LOC_NAME:</label>
           <div class="col-sm-10">
-            <input type="text" class="form-control" name="title" id="post-location" value="{{post[8]}}" disabled>
+            <input type="text" class="form-control" name="INSTA_LOC_NAME" id="post-location" value="{{post[8]}}">
           </div>
         </div>
         <div class="form-group">
           <label for="post-img" class="col-sm-2 control-label">INSTA_IMG_FULL:</label>
           <div class="col-sm-10">
-            <input type="text" class="form-control" name="title" id="post-img" value="{{post[3]}}" disabled>
+            <input type="text" class="form-control" name="INSTA_IMG_FULL" id="post-img" value="{{post[3]}}" disabled>
           </div>
         </div>
         <div class="form-group">
           <label for="post-thumb" class="col-sm-2 control-label">IMAGE_IMG_THUMB:</label>
           <div class="col-sm-10">
-            <input type="text" class="form-control" name="title" id="post-thumb" value="{{post[4]}}" disabled>
+            <input type="text" class="form-control" name="IMAGE_IMG_THUMB" id="post-thumb" value="{{post[4]}}" disabled>
           </div>
         </div>
         <div class="form-group">
           <label for="post-user" class="col-sm-2 control-label">USERNAME:</label>
           <div class="col-sm-10">
-            <input type="text" class="form-control" name="title" id="post-user" value="{{post[5]}}" disabled>
+            <input type="text" class="form-control" name="USERNAME" id="post-user" value="{{post[5]}}" disabled>
           </div>
         </div>
         <div class="form-group">
           <label for="post-date" class="col-sm-2 control-label">INSTA_POST_DATE:</label>
           <div class="col-sm-10">
-            <input type="text" class="form-control" name="title" id="post-date" value="{{post[6]}}" disabled>
+            <input type="text" class="form-control" name="INSTA_POST_DATE" id="post-date" value="{{post[6]}}" disabled>
           </div>
         </div>
 
         <div class="form-group">
           <div class="col-sm-offset-2 col-sm-10">
-            <button id="submit-form" type="submit" class="btn btn-success" disabled>Save Changes</button>
+            <button id="submit-form" type="submit" class="btn btn-success">Save Changes</button>
             <!-- <button id="cancel-event" type="button" class="btn btn-danger">Cancel Changes</button> -->
           </div>
         </div>
