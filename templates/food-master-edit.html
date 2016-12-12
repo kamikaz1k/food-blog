@@ -25,7 +25,13 @@
 
         <div>
             Details about food
+            <ul>
+                {% for detail in post %}
+                <li>{{ detail }}</li>
+                {% endfor %}
+            </ul>
         </div>
+        <p>{{msg}}</p>
  
         <footer class="footer">
             <p>&copy; Company 2015</p>

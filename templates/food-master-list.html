@@ -24,8 +24,13 @@
         </div>
 
         <div>
+            <p>List {{ posts.length }}</p>
+            <p>MSG {{ msg }}</p>
             <ul>
                 <li>Food Item</li>
+                {% for entry in posts %}
+                <li>{{ entry }}</li>
+                {% endfor %}
             </ul>
         </div>
  
