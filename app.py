@@ -189,7 +189,8 @@ def save(insta_id):
         try:
             conn = mysql.connect()
             cursor = conn.cursor()
-            result = cursor.execute("UPDATE FOOD_POSTS SET FOOD_NAME=%s,INSTA_LOC_NAME=%s WHERE INSTA_ID=%s", [FOOD_NAME,INSTA_LOC_NAME,insta_id])
+            result = cursor.execute("UPDATE FOOD_POSTS SET FOOD_NAME=%s,INSTA_LOC_NAME=%s,INSTA_POST_DATE=INSTA_POST_DATE WHERE INSTA_ID=%s", [FOOD_NAME,INSTA_LOC_NAME,insta_id])
+            # The INSTA_POST_DATE=INSTA_POST_DATE is required so that the TIMESTAMP value doesn't automatically get updated by MySQL
             post = cursor.fetchall()
             conn.commit()
             return redirect(url_for("list"))
