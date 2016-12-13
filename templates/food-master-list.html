@@ -22,6 +22,29 @@
 
     <div class="container">
 
+        <nav aria-label="Page navigation">
+          <ul class="pagination">
+            <li>
+              <a href="/list?page={{indexes['prev']}}" aria-label="Previous">
+                <span aria-hidden="true">&laquo; Prev</span>
+              </a>
+            </li>
+            <li>
+                <a href="/list?page={{indexes['next']}}">Current {{indexes['curr']}}</a>
+            </li>
+            <!-- <li><a href="#">1</a></li>
+            <li><a href="#">2</a></li>
+            <li><a href="#">3</a></li>
+            <li><a href="#">4</a></li>
+            <li><a href="#">5</a></li> -->
+            <li>
+              <a href="/list?page={{indexes['next']}}" aria-label="Next">
+                <span aria-hidden="true">Next &raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+
         <div class="list-group">
 
             {% for entry in posts %}
@@ -42,8 +65,32 @@
             {% endfor %}
 
         </div>
+
+        <nav aria-label="Page navigation">
+          <ul class="pagination">
+            <li>
+              <a href="/list?page={{indexes['prev']}}" aria-label="Previous">
+                <span aria-hidden="true">&laquo; Prev</span>
+              </a>
+            </li>
+            <li>
+                <a href="/list?page={{indexes['next']}}">Current {{indexes['curr']}}</a>
+            </li>
+            <!-- <li><a href="#">1</a></li>
+            <li><a href="#">2</a></li>
+            <li><a href="#">3</a></li>
+            <li><a href="#">4</a></li>
+            <li><a href="#">5</a></li> -->
+            <li>
+              <a href="/list?page={{indexes['next']}}" aria-label="Next">
+                <span aria-hidden="true">Next &raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
  
     </div>
+    
 </body>
  
 </html>

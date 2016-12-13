@@ -145,7 +145,12 @@ def list():
     LIMIT = 10
     page = int(request.args.get('page', '1'))
     # Incase someone puts page = 0
-    if (page == 0):
+    indexes = {
+        'prev': page - 1,
+        'curr': page,
+        'next': page + 1
+    }
+    if (page < 1):
         page = 1;
     try:
         conn = mysql.connect()
@@ -157,7 +162,7 @@ def list():
         cursor.close()
         conn.close()
 
-    return render_template("food-master-list.html", posts=posts)#, msg="MSG:::"+str(posts))
+    return render_template("food-master-list.html", posts=posts, indexes=indexes)#, msg="MSG:::"+str(posts))
 
 @app.route("/detail/<insta_id>")
 def detail(insta_id):
