@@ -40,7 +40,7 @@ def create_tables():
     # try:
     #     conn = mysql.connect()
     #     cursor = conn.cursor()
-    #     result = cursor.execute("CREATE TABLE IF NOT EXISTS FOOD_POSTS ( INSTA_ID VARCHAR(35) NOT NULL, INSTA_TEXT VARCHAR(2200), INSTA_LOC_ID INT NULL, INSTA_IMG_FULL VARCHAR(250), IMAGE_IMG_THUMB VARCHAR(250), USERNAME VARCHAR(20), INSTA_POST_DATE TIMESTAMP, PRIMARY KEY (INSTA_ID), FOREIGN KEY (INSTA_LOC_ID) REFERENCES INSTA_LOC(INSTA_LOC_ID) );")
+    #     result = cursor.execute("CREATE TABLE IF NOT EXISTS FOOD_POSTS ( INSTA_ID VARCHAR(35) NOT NULL, INSTA_TEXT VARCHAR(2200), INSTA_LOC_ID INT NULL, INSTA_IMG_FULL VARCHAR(250), IMAGE_IMG_THUMB VARCHAR(250), USERNAME VARCHAR(20), INSTA_POST_DATE TIMESTAMP, INSTA_LOC_NAME VARCHAR(100), FOOD_NAME VARCHAR(100), PRIMARY KEY (INSTA_ID), FOREIGN KEY (INSTA_LOC_ID) REFERENCES INSTA_LOC(INSTA_LOC_ID) );")
     #     # print result, str(cursor.fetchall())
     # except Exception as e:
     #     print "Exception!" + str(e)
@@ -50,9 +50,9 @@ def create_tables():
     result = cursor.execute("SHOW TABLES")
     print "create_tables complete", result, cursor.fetchall()
 
-def populate_table():
+def populate_table(filename='json_output.json'):
     # Open JSON file
-    with open('json_output.json') as data_file: 
+    with open(filename) as data_file: 
         posts = json.load(data_file)
         # Loop through posts and add them to DB
         for item in posts:
@@ -70,11 +70,11 @@ def populate_table():
 def add_item_to_table(item):
     try:
         INSTA_ID = item["id"]
-        INSTA_TEXT = item["caption"]["text"]
+        INSTA_TEXT = item["caption"]["text"] if item["caption"] else ""
         # INSTA_LOC_ID = item.location.id
-        INSTA_LOC_NAME = item["location"]["name"]
-        INSTA_IMG_FULL = item["images"]["standard_resolution"]["url"]
-        IMAGE_IMG_THUMB = item["images"]["thumbnail"]["url"]
+        INSTA_LOC_NAME = item["location"]["name"] if item["location"] else ""
+        INSTA_IMG_FULL = item["images"]["standard_resolution"]["url"] if item["images"] and item["images"]["standard_resolution"] else ""
+        IMAGE_IMG_THUMB = item["images"]["thumbnail"]["url"] if item["images"] and item["images"]["thumbnail"] else ""
         USERNAME = item["user"]["username"]
         INSTA_POST_DATE = int(item["created_time"])
 
@@ -86,7 +86,9 @@ def add_item_to_table(item):
         print "Inserted "+INSTA_ID, result, str(cursor.fetchall())
         
     except Exception as e:
-        print "Exception!" + str(e)
+        print "Exception! for ",INSTA_ID
+        print str(item)
+        print str(e)
 
     finally:
         try:
@@ -121,7 +123,7 @@ def add_location_to_item(item):
         print "Inserted "+INSTA_ID, result, str(cursor.fetchall())
         
     except Exception as e:
-        print "Exception!" + str(e)
+        print "Exception! for " + INSTA_ID + " " + INSTA_LOC_NAME + " -> " + str(e)
 
     finally:
         try:
@@ -144,12 +146,12 @@ def list():
     posts = []
     LIMIT = 10
     page = int(request.args.get('page', '1'))
-    # Incase someone puts page = 0
     indexes = {
         'prev': page - 1,
         'curr': page,
         'next': page + 1
     }
+    # Incase someone puts page = 0
     if (page < 1):
         page = 1;
     try:
@@ -207,5 +209,7 @@ if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
     # create_tables()
+    # populate_table("brianeatss_media_dump.json")
+    # populate_table("kamikaz1_k_media_dump.json")
     # populate_table()
     # populate_locations()
