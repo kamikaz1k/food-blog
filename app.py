@@ -142,10 +142,15 @@ def main():
 @app.route("/list")
 def list():
     posts = []
+    LIMIT = 10
+    page = int(request.args.get('page', '1'))
+    # Incase someone puts page = 0
+    if (page == 0):
+        page = 1;
     try:
         conn = mysql.connect()
         cursor = conn.cursor()
-        result = cursor.execute("SELECT * FROM FOOD_POSTS")
+        result = cursor.execute("SELECT * FROM FOOD_POSTS ORDER BY INSTA_POST_DATE LIMIT %s OFFSET %s", [int(LIMIT), int(page) - 1])
         posts = cursor.fetchall()
         conn.commit()
     finally:
