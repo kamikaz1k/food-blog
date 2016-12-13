@@ -157,7 +157,7 @@ def list():
     try:
         conn = mysql.connect()
         cursor = conn.cursor()
-        result = cursor.execute("SELECT * FROM FOOD_POSTS ORDER BY INSTA_POST_DATE LIMIT %s OFFSET %s", [int(LIMIT), int(page) - 1])
+        result = cursor.execute("SELECT * FROM FOOD_POSTS ORDER BY INSTA_POST_DATE DESC LIMIT %s OFFSET %s", [int(LIMIT), int(page) - 1])
         posts = cursor.fetchall()
         conn.commit()
     finally:
