@@ -69,7 +69,16 @@
       <div class="row">
         <div class="col-md-8 col-md-offset-2 explore">
           <p>Explore</p>
-          <a href="/list">Crispy</a><a href="/list">King</a><a href="/list">Prawn</a><a href="/list">Han Ba Tang</a>
+          <!-- <a href="/list">Crispy</a><a href="/list">King</a><a href="/list">Prawn</a><a href="/list">Han Ba Tang</a> -->
+          <span style="line-height: 2.5em;">
+          {% for tag in name_tags %}
+            <a href="/search?food_name={{tag}}">{{tag}}</a>
+          {% endfor %}
+          {% for tag in location_tags %}
+            <a href="/search?location_name={{tag}}">{{tag}}</a>
+          {% endfor %}
+            <a href="/search?poster={{post[5]}}">{{post[5]}}</a>
+          </span>
         </div>
       </div>
     </div>

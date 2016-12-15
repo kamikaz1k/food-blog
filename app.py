@@ -4,6 +4,7 @@ from werkzeug import generate_password_hash, check_password_hash
 import os
 import sys
 import urlparse
+import re
 
 # App Configurations
 app = Flask(__name__)
@@ -278,7 +279,21 @@ def post(insta_id):
     finally:
         cursor.close()
         conn.close()
-    return render_template("view-post.html", post=post[0])
+
+    # Parse all the explore tag options
+    # For Location
+    location_tags = re.split("(?=[^-])\W",post[0][8])
+    # For Name
+    name_tags = []
+    if post[0][7]:
+        name_tags = re.split("(?=[^-])\W",post[0][7])
+
+    # Hash tags
+    # re.findall("#\w+",posts[0][1])
+    explore_tags = location_tags + name_tags
+
+
+    return render_template("view-post.html", post=post[0], name_tags=name_tags, location_tags=location_tags)
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
