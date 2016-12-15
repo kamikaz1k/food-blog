@@ -139,7 +139,7 @@ def add_location_to_item(item):
 @app.route("/")
 def main():
     # return render_template("index.html")
-    return redirect(url_for('list'))
+    return redirect(url_for('feed'))
 
 @app.route("/list")
 def list():
@@ -179,6 +179,33 @@ def detail(insta_id):
         cursor.close()
         conn.close()
     return render_template("food-master-edit.html", post=post[0], msg=insta_id)
+
+@app.route("/feed")
+def feed():
+    page = int(request.args.get('page', '1'))
+
+    # Setup Query Params
+    LIMIT = 10
+    indexes = {
+        'prev': page - 1,
+        'curr': page,
+        'next': page + 1
+    }
+    posts = []
+
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        result = cursor.execute("SELECT * FROM FOOD_POSTS "
+                                "ORDER BY INSTA_POST_DATE DESC "
+                                "LIMIT %s OFFSET %s", [LIMIT,page-1])
+        posts = cursor.fetchall()
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+
+    return render_template("search-post-results.html", posts=posts, indexes=indexes, msg="FEED")
 
 @app.route("/save/<insta_id>", methods=["POST"])
 def save(insta_id):
