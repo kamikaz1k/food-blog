@@ -40,7 +40,7 @@ def create_tables():
     # try:
     #     conn = mysql.connect()
     #     cursor = conn.cursor()
-    #     result = cursor.execute("CREATE TABLE IF NOT EXISTS FOOD_POSTS ( INSTA_ID VARCHAR(35) NOT NULL, INSTA_TEXT VARCHAR(2200), INSTA_LOC_ID INT NULL, INSTA_IMG_FULL VARCHAR(250), IMAGE_IMG_THUMB VARCHAR(250), USERNAME VARCHAR(20), INSTA_POST_DATE TIMESTAMP, INSTA_LOC_NAME VARCHAR(100), FOOD_NAME VARCHAR(100), PRIMARY KEY (INSTA_ID), FOREIGN KEY (INSTA_LOC_ID) REFERENCES INSTA_LOC(INSTA_LOC_ID) );")
+    #     result = cursor.execute("CREATE TABLE IF NOT EXISTS FOOD_POSTS ( INSTA_ID VARCHAR(35) NOT NULL, INSTA_TEXT VARCHAR(2200), INSTA_LOC_ID INT NULL, INSTA_IMG_FULL VARCHAR(250), IMAGE_IMG_THUMB VARCHAR(250), USERNAME VARCHAR(20), INSTA_POST_DATE TIMESTAMP, INSTA_LOC_NAME VARCHAR(100) NOT NULL DEFAULT '', FOOD_NAME VARCHAR(100), PRIMARY KEY (INSTA_ID), FOREIGN KEY (INSTA_LOC_ID) REFERENCES INSTA_LOC(INSTA_LOC_ID) );")
     #     # print result, str(cursor.fetchall())
     # except Exception as e:
     #     print "Exception!" + str(e)
@@ -204,6 +204,54 @@ def save(insta_id):
             conn.close()
     else:
         return render_template("error.html", title="FORM Error", msg="Either the insta_id or FOOD_NAME or INSTA_LOC_NAME was missing")
+
+@app.route("/search")
+def search():
+    # Valid search params
+    LOCATION = request.args.get("location_name","")
+    FOOD_NAME = request.args.get("food_name","")
+    USERNAME = request.args.get("poster","")
+    page = int(request.args.get('page', '1'))
+
+    # Setup Query Params
+    LIMIT = 10
+    indexes = {
+        'prev': page - 1,
+        'curr': page,
+        'next': page + 1
+    }
+    posts = []
+
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        result = cursor.execute("SELECT * FROM FOOD_POSTS "
+                                "WHERE INSTA_LOC_NAME LIKE %s "
+                                "AND FOOD_NAME LIKE %s "
+                                "AND USERNAME LIKE %s "
+                                "ORDER BY INSTA_POST_DATE DESC "
+                                "LIMIT %s OFFSET %s", ["%"+LOCATION+"%","%"+FOOD_NAME+"%","%"+USERNAME+"%",LIMIT,page-1])
+        posts = cursor.fetchall()
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+
+    return render_template("search-post-results.html", posts=posts, indexes=indexes, msg="LOCATION: "+LOCATION+" FOOD_NAME: "+FOOD_NAME+" USERNAME: "+USERNAME+"\n"+"SELECT * FROM FOOD_POSTS WHERE INSTA_LOC_NAME LIKE " + LOCATION + " AND FOOD_NAME LIKE " + FOOD_NAME + " AND USERNAME LIKE " + USERNAME + " ORDER BY INSTA_POST_DATE DESC " + "LIMIT " + str(LIMIT) + " OFFSET " + str(page))
+
+@app.route("/post/<insta_id>")
+def post(insta_id):
+    post = []
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        result = cursor.execute("SELECT * FROM FOOD_POSTS WHERE INSTA_ID = %s", [insta_id])
+        post = cursor.fetchall()
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+    return render_template("view-post.html", post=post[0])
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
