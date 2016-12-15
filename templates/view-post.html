@@ -53,24 +53,16 @@
       <div class="row">
         <div class="col-md-8 col-md-offset-2" style="text-align:center;">
           <h2>
-            Crispy King Prawn @ <span><a class="location-link" href="/search?location_name={{post[8]|urlencode}}">{{post[8]}}</a></span>
+            {% if post[7] %}
+                {{ post[7] }}
+            {% else %}
+                {{post[1][0:15] + "..."}}
+            {% endif %} @ <span><a class="location-link" href="/search?location_name={{post[8]|urlencode}}">{{post[8]}}</a></span>
           </h2>
-          <!-- <img src="https://instagram.fybz1-1.fna.fbcdn.net/t51.2885-15/s640x640/sh0.08/e35/c0.135.1080.1080/15276700_1349475718459793_5470543301394300928_n.jpg?ig_cache_key=MTQwMjI4NjUyMDE3Nzc1MTA4Nw%3D%3D.2.c" height="500" width="500"> -->
-          <img src="https://instagram.fybz1-1.fna.fbcdn.net/t51.2885-15/s640x640/sh0.08/e35/c0.135.1080.1080/15276700_1349475718459793_5470543301394300928_n.jpg?ig_cache_key=MTQwMjI4NjUyMDE3Nzc1MTA4Nw%3D%3D.2.c" style="width: 100%;">
-          <p>Crispy King Prawn - served with some spicy mayo type sauce, it's a nice little app. 6 shrimps to share... Or hoard :)</p>
-          <p class="text-muted" style="text-align:right;font-style:italic;">Tasted on: Date<br>Posted by: kamikaz1_k</p>
-          <!-- <p style="text-align:right;font-style:italic;">Posted by: kamikaz1_k</p> -->
-          <!-- <div class="panel panel-default">
-            <div class="panel-heading">
-              <h3 class="panel-title">Crispy King Prawn @ <span>Han Ba Tang</span></h3>
-            </div>
-            <div class="panel-body">
-              <img src="https://instagram.fybz1-1.fna.fbcdn.net/t51.2885-15/s640x640/sh0.08/e35/c0.135.1080.1080/15276700_1349475718459793_5470543301394300928_n.jpg?ig_cache_key=MTQwMjI4NjUyMDE3Nzc1MTA4Nw%3D%3D.2.c" height="500" width="500">
-              <p>Crispy King Prawn - served with some spicy mayo type sauce, it's a nice little app. 6 shrimps to share... Or hoard :)</p>
-              <p>Date</p>
-              <p>kamikaz1_k</p>
-            </div>
-          </div> -->
+          <img src="{{post[3]}}" style="width: 100%; max-width:300px;">
+          <br><br>
+          <p>{{post[1]}}</p>
+          <p class="text-muted" style="text-align:right;font-style:italic;">Tasted on: {{post[6]}}<br>Posted by: {{post[5]}}</p>
 
         </div>
       </div>
