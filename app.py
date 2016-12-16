@@ -70,7 +70,7 @@ def populate_table(filename='json_output.json'):
 
 def add_item_to_table(item):
     try:
-        INSTA_ID = item["id"]
+        INSTA_ID = item["code"]
         INSTA_TEXT = item["caption"]["text"] if item["caption"] else ""
         # INSTA_LOC_ID = item.location.id
         INSTA_LOC_NAME = item["location"]["name"] if item["location"] else ""
