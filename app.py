@@ -278,7 +278,7 @@ def post(insta_id):
         conn = mysql.connect()
         cursor = conn.cursor()
         result = cursor.execute("SELECT * FROM FOOD_POSTS WHERE INSTA_ID = %s", [insta_id])
-        post = cursor.fetchall()
+        post = cursor.fetchall()[0]
         conn.commit()
     finally:
         cursor.close()
@@ -287,13 +287,13 @@ def post(insta_id):
     # Parse all the explore tag options
     # For Location split the words
     # And filter out the empty strings
-    location_tags = re.split("(?=[^-])\W+",post[0][8])
+    location_tags = re.split("(?=[^-])\W+",post[8])
     location_tags = [k for k in location_tags if k is not ''] # For some reason it is not working in flask, but it is on cmd
 
     # For Name split the words
     # And filter out the empty strings
-    if post[0][7]:
-        name_tags = re.split("(?=[^-])\W+",post[0][7])
+    if post[7]:
+        name_tags = re.split("(?=[^-])\W+",post[7])
         name_tags = [k for k in name_tags if k is not '']
     else:
         name_tags = []
@@ -301,7 +301,17 @@ def post(insta_id):
     # Hash tags
     # re.findall("#\w+",posts[0][1])
 
-    return render_template("view-post.html", post=post[0], name_tags=name_tags, location_tags=location_tags, msg=post[0][8] + "::" + str(location_tags))
+    return render_template("view-post.html", 
+                            food_name=post[7],
+                            food_caption=post[1],
+                            location_name=post[8],
+                            image_link=post[9],
+                            post_date=post[6],
+                            username=post[5],
+                            post_id=post[0], 
+                            name_tags=name_tags, 
+                            location_tags=location_tags, 
+                            msg='post[0][8] + "::" + str(location_tags)')
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
