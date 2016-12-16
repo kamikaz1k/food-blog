@@ -41,7 +41,7 @@ def create_tables():
     # try:
     #     conn = mysql.connect()
     #     cursor = conn.cursor()
-    #     result = cursor.execute("CREATE TABLE IF NOT EXISTS FOOD_POSTS ( INSTA_ID VARCHAR(35) NOT NULL, INSTA_TEXT VARCHAR(2200), INSTA_LOC_ID INT NULL, INSTA_IMG_FULL VARCHAR(250), IMAGE_IMG_THUMB VARCHAR(250), USERNAME VARCHAR(20), INSTA_POST_DATE TIMESTAMP, INSTA_LOC_NAME VARCHAR(100) NOT NULL DEFAULT '', FOOD_NAME VARCHAR(100), PRIMARY KEY (INSTA_ID), FOREIGN KEY (INSTA_LOC_ID) REFERENCES INSTA_LOC(INSTA_LOC_ID) );")
+    #     result = cursor.execute("CREATE TABLE IF NOT EXISTS FOOD_POSTS ( INSTA_ID VARCHAR(35) NOT NULL, INSTA_TEXT VARCHAR(2200), INSTA_LOC_ID INT NULL, INSTA_IMG_FULL VARCHAR(250), INSTA_IMG_THUMB VARCHAR(250), USERNAME VARCHAR(20), INSTA_POST_DATE TIMESTAMP, INSTA_LOC_NAME VARCHAR(100) NOT NULL DEFAULT '', FOOD_NAME VARCHAR(100), PRIMARY KEY (INSTA_ID), FOREIGN KEY (INSTA_LOC_ID) REFERENCES INSTA_LOC(INSTA_LOC_ID) );")
     #     # print result, str(cursor.fetchall())
     # except Exception as e:
     #     print "Exception!" + str(e)
@@ -75,14 +75,14 @@ def add_item_to_table(item):
         # INSTA_LOC_ID = item.location.id
         INSTA_LOC_NAME = item["location"]["name"] if item["location"] else ""
         INSTA_IMG_FULL = item["images"]["standard_resolution"]["url"] if item["images"] and item["images"]["standard_resolution"] else ""
-        IMAGE_IMG_THUMB = item["images"]["thumbnail"]["url"] if item["images"] and item["images"]["thumbnail"] else ""
+        INSTA_IMG_THUMB = item["images"]["thumbnail"]["url"] if item["images"] and item["images"]["thumbnail"] else ""
         USERNAME = item["user"]["username"]
         INSTA_POST_DATE = int(item["created_time"])
 
-        # print "Item INFO:",INSTA_ID,INSTA_TEXT,INSTA_IMG_FULL,IMAGE_IMG_THUMB,USERNAME,INSTA_POST_DATE
+        # print "Item INFO:",INSTA_ID,INSTA_TEXT,INSTA_IMG_FULL,INSTA_IMG_THUMB,USERNAME,INSTA_POST_DATE
         conn = mysql.connect()
         cursor = conn.cursor()
-        result = cursor.execute("INSERT INTO FOOD_POSTS (INSTA_ID, INSTA_TEXT, INSTA_IMG_FULL, IMAGE_IMG_THUMB, USERNAME, INSTA_POST_DATE, INSTA_LOC_NAME) VALUES (%s, %s, %s, %s, %s, FROM_UNIXTIME(%s),%s)", (INSTA_ID,INSTA_TEXT,INSTA_IMG_FULL,IMAGE_IMG_THUMB,USERNAME,INSTA_POST_DATE,INSTA_LOC_NAME))
+        result = cursor.execute("INSERT INTO FOOD_POSTS (INSTA_ID, INSTA_TEXT, INSTA_IMG_FULL, INSTA_IMG_THUMB, USERNAME, INSTA_POST_DATE, INSTA_LOC_NAME) VALUES (%s, %s, %s, %s, %s, FROM_UNIXTIME(%s),%s)", (INSTA_ID,INSTA_TEXT,INSTA_IMG_FULL,INSTA_IMG_THUMB,USERNAME,INSTA_POST_DATE,INSTA_LOC_NAME))
         conn.commit()
         print "Inserted "+INSTA_ID, result, str(cursor.fetchall())
         
@@ -116,7 +116,7 @@ def add_location_to_item(item):
         INSTA_ID = item["id"]
         INSTA_LOC_NAME = item["location"]["name"]
 
-        # print "Item INFO:",INSTA_ID,INSTA_TEXT,INSTA_IMG_FULL,IMAGE_IMG_THUMB,USERNAME,INSTA_POST_DATE
+        # print "Item INFO:",INSTA_ID,INSTA_TEXT,INSTA_IMG_FULL,INSTA_IMG_THUMB,USERNAME,INSTA_POST_DATE
         conn = mysql.connect()
         cursor = conn.cursor()
         result = cursor.execute("UPDATE FOOD_POSTS SET INSTA_LOC_NAME=%s WHERE INSTA_ID=%s", (INSTA_LOC_NAME, INSTA_ID))
@@ -281,19 +281,23 @@ def post(insta_id):
         conn.close()
 
     # Parse all the explore tag options
-    # For Location
-    location_tags = re.split("(?=[^-])\W",post[0][8])
-    # For Name
-    name_tags = []
+    # For Location split the words
+    # And filter out the empty strings
+    location_tags = re.split("(?=[^-])\W+",post[0][8])
+    location_tags = [k for k in location_tags if k is not ''] # For some reason it is not working in flask, but it is on cmd
+
+    # For Name split the words
+    # And filter out the empty strings
     if post[0][7]:
-        name_tags = re.split("(?=[^-])\W",post[0][7])
+        name_tags = re.split("(?=[^-])\W+",post[0][7])
+        name_tags = [k for k in name_tags if k is not '']
+    else:
+        name_tags = []
 
     # Hash tags
     # re.findall("#\w+",posts[0][1])
-    explore_tags = location_tags + name_tags
 
-
-    return render_template("view-post.html", post=post[0], name_tags=name_tags, location_tags=location_tags)
+    return render_template("view-post.html", post=post[0], name_tags=name_tags, location_tags=location_tags, msg=post[0][8] + "::" + str(location_tags))
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
