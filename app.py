@@ -5,27 +5,60 @@ import os
 import sys
 import urlparse
 import re
+from flask_sqlalchemy import SQLAlchemy
 
 # App Configurations
 app = Flask(__name__)
 
 # Register database schemes in URLs.
 urlparse.uses_netloc.append('mysql')
-
+url = ""
 if 'DATABASE_URL' in os.environ:
     url = urlparse.urlparse(os.environ['DATABASE_URL'])
 else:
     raise Exception("DATABASE_URL not set in os.environ")
 
 # MySQL configurations
-app.config['MYSQL_DATABASE_USER'] = url.username
-app.config['MYSQL_DATABASE_PASSWORD'] = url.password
-app.config['MYSQL_DATABASE_DB'] = url.path[1:]
-app.config['MYSQL_DATABASE_HOST'] = url.hostname
-app.config['MYSQL_DATABASE_PORT'] = url.port
+# app.config['MYSQL_DATABASE_USER'] = url.username
+# app.config['MYSQL_DATABASE_PASSWORD'] = url.password
+# app.config['MYSQL_DATABASE_DB'] = url.path[1:]
+# app.config['MYSQL_DATABASE_HOST'] = url.hostname
+# app.config['MYSQL_DATABASE_PORT'] = url.port
+app.config['SQLALCHEMY_DATABASE_URI'] = url.geturl()
+db = SQLAlchemy(app)
+db.init_app(app) #It works without?
 
-mysql = MySQL()
-mysql.init_app(app)
+# mysql = MySQL()
+# mysql.init_app(app)
+
+class FoodPost(db.Model):
+    __tablename__ = 'FOOD_POSTS'
+    insta_id = db.Column(db.String(50), primary_key=True)
+    insta_text = db.Column(db.String(2200))
+    insta_loc_id = db.Column(db.Integer, db.ForeignKey('INSTA_LOC.insta_loc_id'))
+    insta_img_full = db.Column(db.String(250))
+    insta_img_thumb = db.Column(db.String(250))
+    insta_img_med = db.Column(db.String(250))
+    username = db.Column(db.String(20))
+    insta_post_date = db.Column(db.TIMESTAMP)
+    insta_loc_name = db.Column(db.String(100))
+    food_name = db.Column(db.String(100), default="")
+
+    def __init__(self, insta_id, insta_text, insta_loc_id, insta_img_full, insta_img_thumb, insta_img_med, username, insta_post_date, insta_loc_name, food_name):
+        self.insta_id = insta_id
+        self.insta_text = insta_text
+        self.insta_loc_id = insta_loc_id
+        self.insta_img_full = insta_img_full
+        self.insta_img_thumb = insta_img_thumb
+        self.insta_img_med = insta_img_med
+        self.username = username
+        self.insta_post_date = insta_post_date
+        self.insta_loc_name = insta_loc_name
+        self.food_name = food_name
+
+    def __repr__(self):
+        return "<FoodPost(insta_id='%s', insta_text='%s', insta_loc_id='%s', insta_img_full='%s', insta_img_thumb='%s', insta_img_med='%s', username='%s', insta_post_date='%s', insta_loc_name='%s', food_name)>" % (
+                self.insta_id, self.insta_text, self.insta_loc_id, self.insta_img_full, self.insta_img_thumb, self.insta_img_med, self.username, self.insta_post_date, self.insta_loc_name, self.food_name)
 
 def create_tables():
     # # Create INSTA_LOC Table
@@ -41,7 +74,7 @@ def create_tables():
     # try:
     #     conn = mysql.connect()
     #     cursor = conn.cursor()
-    #     result = cursor.execute("CREATE TABLE IF NOT EXISTS FOOD_POSTS ( INSTA_ID VARCHAR(50) NOT NULL, INSTA_TEXT VARCHAR(2200), INSTA_LOC_ID INT NULL, INSTA_IMG_FULL VARCHAR(250), INSTA_IMG_THUMB VARCHAR(250), USERNAME VARCHAR(20), INSTA_POST_DATE TIMESTAMP, INSTA_LOC_NAME VARCHAR(100) NOT NULL DEFAULT '', FOOD_NAME VARCHAR(100), PRIMARY KEY (INSTA_ID), FOREIGN KEY (INSTA_LOC_ID) REFERENCES INSTA_LOC(INSTA_LOC_ID) );")
+    #     result = cursor.execute("CREATE TABLE IF NOT EXISTS FOOD_POSTS ( INSTA_ID VARCHAR(50) NOT NULL, INSTA_TEXT VARCHAR(2200), INSTA_LOC_ID INT NULL, INSTA_IMG_FULL VARCHAR(250), INSTA_IMG_THUMB VARCHAR(250), USERNAME VARCHAR(20), INSTA_POST_DATE TIMESTAMP, INSTA_LOC_NAME VARCHAR(100) NOT NULL DEFAULT '', FOOD_NAME VARCHAR(100), INSTA_IMG_MED VARCHAR(250), PRIMARY KEY (INSTA_ID), FOREIGN KEY (INSTA_LOC_ID) REFERENCES INSTA_LOC(INSTA_LOC_ID) );")
     #     # print result, str(cursor.fetchall())
     # except Exception as e:
     #     print "Exception!" + str(e)
@@ -173,17 +206,18 @@ def list():
 
 @app.route("/detail/<insta_id>")
 def detail(insta_id):
-    post = []
-    try:
-        conn = mysql.connect()
-        cursor = conn.cursor()
-        result = cursor.execute("SELECT * FROM FOOD_POSTS WHERE INSTA_ID = %s", [insta_id])
-        post = cursor.fetchall()
-        conn.commit()
-    finally:
-        cursor.close()
-        conn.close()
-    return render_template("food-master-edit.html", post=post[0], msg=insta_id)
+    # post = []
+    # try:
+    #     conn = mysql.connect()
+    #     cursor = conn.cursor()
+    #     result = cursor.execute("SELECT * FROM FOOD_POSTS WHERE INSTA_ID = %s", [insta_id])
+    #     post = cursor.fetchall()
+    #     conn.commit()
+    # finally:
+    #     cursor.close()
+    #     conn.close()
+    post = FoodPost.query.filter_by(insta_id=insta_id).first()
+    return render_template("food-master-edit.html", post=post, msg=insta_id)
 
 @app.route("/feed")
 def feed():
@@ -314,8 +348,10 @@ def post(insta_id):
                             msg='post[0][8] + "::" + str(location_tags)')
 
 if __name__ == "__main__":
+    # print "DATABASE_URL: " + url
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+
     # create_tables()
     # populate_table("brianeatss_media_dump.json")
     # populate_table("kamikaz1_k_media_dump.json")
