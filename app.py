@@ -1,32 +1,19 @@
 from flask import Flask, render_template, json, request, redirect, session, url_for
-from flask.ext.mysql import MySQL
-from werkzeug import generate_password_hash, check_password_hash
 import os
-import sys
-import urlparse
 import re
+import pdb
 from flask_sqlalchemy import SQLAlchemy
 
+if 'DATABASE_URL' not in os.environ:
+    raise Exception("DATABASE_URL not set in os.environ")
+    
 # App Configurations
 app = Flask(__name__)
 
-# Register database schemes in URLs.
-urlparse.uses_netloc.append('mysql')
-url = ""
-if 'DATABASE_URL' in os.environ:
-    url = urlparse.urlparse(os.environ['DATABASE_URL'])
-else:
-    raise Exception("DATABASE_URL not set in os.environ")
-
 # MySQL configurations
-# app.config['MYSQL_DATABASE_USER'] = url.username
-# app.config['MYSQL_DATABASE_PASSWORD'] = url.password
-# app.config['MYSQL_DATABASE_DB'] = url.path[1:]
-# app.config['MYSQL_DATABASE_HOST'] = url.hostname
-# app.config['MYSQL_DATABASE_PORT'] = url.port
-app.config['SQLALCHEMY_DATABASE_URI'] = url.geturl()
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
-db.init_app(app) #It works without?
 
 # mysql = MySQL()
 # mysql.init_app(app)
@@ -35,12 +22,12 @@ class FoodPost(db.Model):
     __tablename__ = 'FOOD_POSTS'
     insta_id = db.Column(db.String(50), primary_key=True)
     insta_text = db.Column(db.String(2200))
-    insta_loc_id = db.Column(db.Integer, db.ForeignKey('INSTA_LOC.insta_loc_id'))
+    insta_loc_id = db.Column(db.Integer, db.ForeignKey('INSTA_LOC.insta_loc_id'), nullable=True)
     insta_img_full = db.Column(db.String(250))
     insta_img_thumb = db.Column(db.String(250))
     insta_img_med = db.Column(db.String(250))
     username = db.Column(db.String(20))
-    insta_post_date = db.Column(db.TIMESTAMP)
+    insta_post_date = db.Column(db.TIMESTAMP, server_default='0')
     insta_loc_name = db.Column(db.String(100))
     food_name = db.Column(db.String(100), default="")
 
@@ -57,8 +44,29 @@ class FoodPost(db.Model):
         self.food_name = food_name
 
     def __repr__(self):
-        return "<FoodPost(insta_id='%s', insta_text='%s', insta_loc_id='%s', insta_img_full='%s', insta_img_thumb='%s', insta_img_med='%s', username='%s', insta_post_date='%s', insta_loc_name='%s', food_name)>" % (
+        return "<FoodPost(insta_id='%s', insta_text='%s', insta_loc_id='%s', insta_img_full='%s', insta_img_thumb='%s', insta_img_med='%s', username='%s', insta_post_date='%s', insta_loc_name='%s', food_name='%s')>" % (
                 self.insta_id, self.insta_text, self.insta_loc_id, self.insta_img_full, self.insta_img_thumb, self.insta_img_med, self.username, self.insta_post_date, self.insta_loc_name, self.food_name)
+
+class InstaLoc(db.Model):
+    __tablename__ = 'INSTA_LOC'
+    insta_loc_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+    lat = db.Column(db.String(20))
+    lng = db.Column(db.String(20))
+    address = db.Column(db.String(200), default="")
+    category = db.Column(db.String(200), default="")
+
+    def __init__(self, insta_loc_id, name, lat, lng, address, category):
+        self.insta_loc_id = insta_loc_id
+        self.name = name
+        self.lat = lat
+        self.lng = lng
+        self.address = address
+        self.category = category
+
+    def __repr__(self):
+        return "<FoodPost(insta_loc_id='%s', name='%s', lat='%s', lng='%s', address='%s', category='%s')>" % (
+                self.insta_loc_id, self.name, self.lat, self.lng, self.address, self.category)
 
 def create_tables():
     # # Create INSTA_LOC Table
@@ -79,10 +87,8 @@ def create_tables():
     # except Exception as e:
     #     print "Exception!" + str(e)
 
-    conn = mysql.connect()
-    cursor = conn.cursor()
-    result = cursor.execute("SHOW TABLES")
-    print "create_tables complete", result, cursor.fetchall()
+    db.create_all()
+    print "create_tables complete", db.metadata.tables.items()
 
 def populate_table(filename='json_output.json'):
     # Open JSON file
@@ -181,42 +187,25 @@ def main():
 
 @app.route("/list")
 def list():
-    posts = []
     LIMIT = 10
     page = int(request.args.get('page', '1'))
-    indexes = {
-        'prev': page - 1,
-        'curr': page,
-        'next': page + 1
-    }
-    # Incase someone puts page = 0
-    if (page < 1):
-        page = 1;
-    try:
-        conn = mysql.connect()
-        cursor = conn.cursor()
-        result = cursor.execute("SELECT * FROM FOOD_POSTS ORDER BY INSTA_POST_DATE DESC LIMIT %s OFFSET %s", [int(LIMIT), int(page) - 1])
-        posts = cursor.fetchall()
-        conn.commit()
-    finally:
-        cursor.close()
-        conn.close()
 
-    return render_template("food-master-list.html", posts=posts, indexes=indexes)#, msg="MSG:::"+str(posts))
+    try:
+        paginated_posts = FoodPost.query.order_by(FoodPost.insta_post_date.desc()).paginate(page, LIMIT, False)
+    except Exception as e:
+        return render_template("error.html", title="QUERY Error", msg=str(e))
+
+    return render_template("food-master-list.html",
+                           posts=paginated_posts.items,
+                           pagination=paginated_posts)
 
 @app.route("/detail/<insta_id>")
 def detail(insta_id):
-    # post = []
-    # try:
-    #     conn = mysql.connect()
-    #     cursor = conn.cursor()
-    #     result = cursor.execute("SELECT * FROM FOOD_POSTS WHERE INSTA_ID = %s", [insta_id])
-    #     post = cursor.fetchall()
-    #     conn.commit()
-    # finally:
-    #     cursor.close()
-    #     conn.close()
-    post = FoodPost.query.filter_by(insta_id=insta_id).first()
+    try:
+        post = FoodPost.query.filter_by(insta_id=insta_id).first()
+    except Exception as e:
+        return render_template("error.html", title="QUERY Error", msg=str(e))
+
     return render_template("food-master-edit.html", post=post, msg=insta_id)
 
 @app.route("/feed")
@@ -225,26 +214,17 @@ def feed():
 
     # Setup Query Params
     LIMIT = 10
-    indexes = {
-        'prev': page - 1,
-        'curr': page,
-        'next': page + 1
-    }
-    posts = []
 
     try:
-        conn = mysql.connect()
-        cursor = conn.cursor()
-        result = cursor.execute("SELECT * FROM FOOD_POSTS "
-                                "ORDER BY INSTA_POST_DATE DESC "
-                                "LIMIT %s OFFSET %s", [LIMIT,page-1])
-        posts = cursor.fetchall()
-        conn.commit()
-    finally:
-        cursor.close()
-        conn.close()
+        paginated_posts = FoodPost.query.order_by(FoodPost.insta_post_date.desc()).paginate(page, LIMIT, False)
+    except Exception as e:
+        return render_template("error.html", title="QUERY Error", msg=str(e))
+    # pdb.set_trace()
 
-    return render_template("search-post-results.html", posts=posts, indexes=indexes, msg="FEED")
+    return render_template("search-post-results.html",
+                            posts=paginated_posts.items,
+                            pagination=paginated_posts,
+                            msg="has_next {} | has_prev {} |".format(paginated_posts.has_next, paginated_posts.has_prev))
 
 @app.route("/save/<insta_id>", methods=["POST"])
 def save(insta_id):
@@ -255,79 +235,62 @@ def save(insta_id):
 
     if insta_id and FOOD_NAME and INSTA_LOC_NAME:
         try:
-            conn = mysql.connect()
-            cursor = conn.cursor()
-            result = cursor.execute("UPDATE FOOD_POSTS SET FOOD_NAME=%s,INSTA_LOC_NAME=%s,INSTA_POST_DATE=INSTA_POST_DATE WHERE INSTA_ID=%s", [FOOD_NAME,INSTA_LOC_NAME,insta_id])
-            # The INSTA_POST_DATE=INSTA_POST_DATE is required so that the TIMESTAMP value doesn't automatically get updated by MySQL
-            post = cursor.fetchall()
-            conn.commit()
+            post = FoodPost.query.filter_by(insta_id=insta_id).first()
+            post.food_name = FOOD_NAME
+            post.insta_loc_name = INSTA_LOC_NAME
+            post.insta_post_date = post.insta_post_date
+            db.session.commit()
             return redirect(url_for("list"))
-            # return render_template("error.html", title="Save SUCCESS", msg=str(post))
         except Exception as e:
             return render_template("error.html", title="QUERY Error", msg=str(e))
-        finally:
-            cursor.close()
-            conn.close()
     else:
         return render_template("error.html", title="FORM Error", msg="Either the insta_id or FOOD_NAME or INSTA_LOC_NAME was missing")
 
 @app.route("/search")
 def search():
     # Valid search params
-    LOCATION = request.args.get("location_name","")
-    FOOD_NAME = request.args.get("food_name","")
-    USERNAME = request.args.get("poster","")
+    LOCATION = "%{}%".format(request.args.get("location_name",""))
+    FOOD_NAME = "%{}%".format(request.args.get("food_name",""))
+    USERNAME = "%{}%".format(request.args.get("poster",""))
     page = int(request.args.get('page', '1'))
 
     # Setup Query Params
     LIMIT = 10
-    indexes = {
-        'prev': page - 1,
-        'curr': page,
-        'next': page + 1
-    }
-    posts = []
 
     try:
-        conn = mysql.connect()
-        cursor = conn.cursor()
-        result = cursor.execute("SELECT * FROM FOOD_POSTS "
-                                "WHERE INSTA_LOC_NAME LIKE %s "
-                                "AND FOOD_NAME LIKE %s "
-                                "AND USERNAME LIKE %s "
-                                "ORDER BY INSTA_POST_DATE DESC "
-                                "LIMIT %s OFFSET %s", ["%"+LOCATION+"%","%"+FOOD_NAME+"%","%"+USERNAME+"%",LIMIT,page-1])
-        posts = cursor.fetchall()
-        conn.commit()
-    finally:
-        cursor.close()
-        conn.close()
+        paginated_posts = FoodPost.query.order_by(FoodPost.insta_post_date.desc()) \
+                                    .filter(FoodPost.insta_loc_name.ilike(LOCATION), FoodPost.food_name.ilike(FOOD_NAME), FoodPost.username.ilike(USERNAME)) \
+                                    .paginate(page, LIMIT, False)
+    except Exception as e:
+        return render_template("error.html", title="QUERY Error", msg=str(e))
 
-    return render_template("search-post-results.html", posts=posts, indexes=indexes, msg="LOCATION: "+LOCATION+" FOOD_NAME: "+FOOD_NAME+" USERNAME: "+USERNAME+"\n"+"SELECT * FROM FOOD_POSTS WHERE INSTA_LOC_NAME LIKE " + LOCATION + " AND FOOD_NAME LIKE " + FOOD_NAME + " AND USERNAME LIKE " + USERNAME + " ORDER BY INSTA_POST_DATE DESC " + "LIMIT " + str(LIMIT) + " OFFSET " + str(page))
+    return render_template("search-post-results.html",
+                            posts=paginated_posts.items,
+                            pagination=paginated_posts,
+                            page=page,
+                            location_name=LOCATION[1:-1],
+                            food_name=FOOD_NAME[1:-1],
+                            msg="LOCATION: {} | FOOD_NAME: {} | USERNAME: {} | Page: {}".format(LOCATION, FOOD_NAME, USERNAME, page))
 
 @app.route("/post/<insta_id>")
 def post(insta_id):
+    
     post = []
     try:
-        conn = mysql.connect()
-        cursor = conn.cursor()
-        result = cursor.execute("SELECT * FROM FOOD_POSTS WHERE INSTA_ID = %s", [insta_id])
-        post = cursor.fetchall()[0]
-        conn.commit()
-    finally:
-        cursor.close()
-        conn.close()
+        post = FoodPost.query.filter_by(insta_id=insta_id).first()
+    except Exception as e:
+        return render_template("error.html", title="QUERY Error", msg=str(e))
 
     # Parse all the explore tag options
     # For Location split the words
     # And filter out the empty strings
-    location_tags = re.split("(?=[^-])\W+",post[8])
+    location_tags = re.split("(?=[^-])\W+", post.insta_loc_name)
     location_tags = [k for k in location_tags if k is not ''] # For some reason it is not working in flask, but it is on cmd
 
     # For Name split the words
     # And filter out the empty strings
-    if post[7]:
-        name_tags = re.split("(?=[^-])\W+",post[7])
+    if post.food_name:
+        name_tags = re.split("(?=[^-])\W+", post.food_name)
         name_tags = [k for k in name_tags if k is not '']
     else:
         name_tags = []
@@ -336,23 +299,23 @@ def post(insta_id):
     # re.findall("#\w+",posts[0][1])
 
     return render_template("view-post.html", 
-                            food_name=post[7],
-                            food_caption=post[1],
-                            location_name=post[8],
-                            image_link=post[9],
-                            post_date=post[6],
-                            username=post[5],
-                            post_id=post[0], 
+                            food_name=post.food_name,
+                            food_caption=post.insta_text,
+                            location_name=post.insta_loc_name,
+                            image_link=post.insta_img_full,
+                            post_date=post.insta_post_date,
+                            username=post.username,
+                            post_id=post.insta_id, 
                             name_tags=name_tags, 
                             location_tags=location_tags, 
-                            msg='post[0][8] + "::" + str(location_tags)')
+                            msg='location_tags + "::"' + str(location_tags))
 
 if __name__ == "__main__":
     # print "DATABASE_URL: " + url
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
 
-    # create_tables()
+    create_tables()
     # populate_table("brianeatss_media_dump.json")
     # populate_table("kamikaz1_k_media_dump.json")
     # populate_table()

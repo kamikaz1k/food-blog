@@ -24,67 +24,67 @@
         <h2>
             Details about food
         </h2>
-        <form class="form-horizontal" action="/save/{{post[0]}}" method="post">
+        <form class="form-horizontal" action="/save/{{post.insta_id}}" method="post">
 
         <div class="form-group">
           <label for="post-id" class="col-sm-2 control-label">INSTA_ID:</label>
           <div class="col-sm-10">
-            <!-- <input type="text" class="form-control" name="INSTA_ID" id="post-id" value="{{post[0]}}" disabled> -->
-            <p style="padding-top:7px">{{post[0]}}</p>
+            <!-- <input type="text" class="form-control" name="INSTA_ID" id="post-id" value="{{post.insta_id}}" disabled> -->
+            <p style="padding-top:7px">{{post.insta_id}}</p>
           </div>
         </div>
         <div class="form-group">
           <label for="post-name" class="col-sm-2 control-label">FOOD_NAME:</label>
           <div class="col-sm-10">
-            <input type="text" class="form-control" name="FOOD_NAME" id="post-name" value="{{post[7]}}">
+            <input type="text" class="form-control" name="FOOD_NAME" id="post-name" value="{{post.food_name}}">
           </div>
         </div>
         <div class="form-group">
           <label for="post-text" class="col-sm-2 control-label">INSTA_TEXT:</label>
           <div class="col-sm-10">
-            <!-- <input type="text" class="form-control" name="INSTA_TEXT" id="post-text" value="{{post[1]}}" disabled> -->
-            <p style="padding-top:7px">{{post[1]}}</p>
+            <!-- <input type="text" class="form-control" name="INSTA_TEXT" id="post-text" value="{{post.insta_text}}" disabled> -->
+            <p style="padding-top:7px">{{post.insta_text}}</p>
           </div>
         </div>
         <div class="form-group">
           <label for="post-location-id" class="col-sm-2 control-label">INSTA_LOC_ID:</label>
           <div class="col-sm-10">
-            <!-- <input type="text" class="form-control" name="INSTA_LOC_ID" id="post-location-id" value="{{post[2]}}" disabled> -->
-            <p style="padding-top:7px">{{post[2]}}</p>
+            <!-- <input type="text" class="form-control" name="INSTA_LOC_ID" id="post-location-id" value="{{post.insta_loc_id}}" disabled> -->
+            <p style="padding-top:7px">{{post.insta_loc_id}}</p>
           </div>
         </div>
         <div class="form-group">
           <label for="post-location" class="col-sm-2 control-label">INSTA_LOC_NAME:</label>
           <div class="col-sm-10">
-            <input type="text" class="form-control" name="INSTA_LOC_NAME" id="post-location" value="{{post[8]}}">
+            <input type="text" class="form-control" name="INSTA_LOC_NAME" id="post-location" value="{{post.insta_loc_name}}">
           </div>
         </div>
         <div class="form-group">
           <label for="post-img" class="col-sm-2 control-label">INSTA_IMG_FULL:</label>
           <div class="col-sm-10">
-            <!-- <input type="text" class="form-control" name="INSTA_IMG_FULL" id="post-img" value="{{post[3]}}" disabled> -->
-            <a href="{{post[3]}}" style="padding-top:7px">{{post[3]}}</a>
+            <!-- <input type="text" class="form-control" name="INSTA_IMG_FULL" id="post-img" value="{{post.insta_img_full}}" disabled> -->
+            <a href="{{post.insta_img_full}}" style="padding-top:7px">{{post.insta_img_full}}</a>
           </div>
         </div>
         <div class="form-group">
           <label for="post-thumb" class="col-sm-2 control-label">IMAGE_IMG_THUMB:</label>
           <div class="col-sm-10">
-            <!-- <input type="text" class="form-control" name="IMAGE_IMG_THUMB" id="post-thumb" value="{{post[4]}}" disabled> -->
-            <a href="{{post[4]}}" style="padding-top:7px">{{post[4]}}</a>
+            <!-- <input type="text" class="form-control" name="IMAGE_IMG_THUMB" id="post-thumb" value="{{post.insta_img_thumb}}" disabled> -->
+            <a href="{{post.insta_img_thumb}}" style="padding-top:7px">{{post.insta_img_thumb}}</a>
           </div>
         </div>
         <div class="form-group">
           <label for="post-user" class="col-sm-2 control-label">USERNAME:</label>
           <div class="col-sm-10">
-            <!-- <input type="text" class="form-control" name="USERNAME" id="post-user" value="{{post[5]}}" disabled> -->
-            <p style="padding-top:7px">{{post[5]}}</p>
+            <!-- <input type="text" class="form-control" name="USERNAME" id="post-user" value="{{post.username}}" disabled> -->
+            <p style="padding-top:7px">{{post.username}}</p>
           </div>
         </div>
         <div class="form-group">
           <label for="post-date" class="col-sm-2 control-label">INSTA_POST_DATE:</label>
           <div class="col-sm-10">
-            <!-- <input type="text" class="form-control" name="INSTA_POST_DATE" id="post-date" value="{{post[6]}}" disabled> -->
-            <p style="padding-top:7px">{{post[6]}}</p>
+            <!-- <input type="text" class="form-control" name="INSTA_POST_DATE" id="post-date" value="{{post.insta_post_date}}" disabled> -->
+            <p style="padding-top:7px">{{post.insta_post_date}}</p>
           </div>
         </div>
 

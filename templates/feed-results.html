@@ -42,21 +42,21 @@
             {% for page in pagination.iter_pages() %}
 
             {% if page == None %}
-            <li class="disabled">
+            <li>
                 <a href="/">...</a>
             </li>
             {% elif page != pagination.page %}
             <li>
-              <a href="/search?location_name={{location_name}}&food_name&{{food_name}}&page={{page}}" aria-label="Previous">
+              <a href="/feed?page={{page}}" aria-label="Previous">
                 <span aria-hidden="true">{{page}}</span>
               </a>
             </li>
             {% else %}
             <li class="active">
-                <a href="/search?location_name={{location_name}}&food_name&{{food_name}}&page={{page}}">{{page}}</a>
+                <a href="/feed?page={{page}}">{{page}}</a>
             </li>
             {% endif %}
-
+            
             {% endfor %}
           </ul>
         </nav>
@@ -65,7 +65,7 @@
             {% for entry in posts %}
             <li class="media">
                 <div class="media-left">
-                    <a href="{{'/post/' + entry.insta_id}}">
+                    <a href="{{"/post/" + entry.insta_id}}">
                         <img class="media-object" src="{{entry.insta_img_thumb}}" alt="thumbnail">
                     </a>
                 </div>
@@ -96,13 +96,13 @@
             </li>
             {% elif page != pagination.page %}
             <li>
-              <a href="/search?location_name={{location_name}}&food_name&{{food_name}}&page={{page}}" aria-label="Previous">
+              <a href="/feed?page={{page}}" aria-label="Previous">
                 <span aria-hidden="true">{{page}}</span>
               </a>
             </li>
             {% else %}
             <li class="active">
-                <a href="/search?location_name={{location_name}}&food_name&{{food_name}}&page={{page}}">{{page}}</a>
+                <a href="/feed?page={{page}}">{{page}}</a>
             </li>
             {% endif %}
             
