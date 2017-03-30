@@ -2,6 +2,7 @@ from flask import Flask, render_template, json, request, redirect, session, url_
 import os
 import re
 import pdb
+import datetime
 from flask_sqlalchemy import SQLAlchemy
 
 if 'DATABASE_URL' not in os.environ:
@@ -15,8 +16,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
 
-# mysql = MySQL()
-# mysql.init_app(app)
+db.create_all()
 
 class FoodPost(db.Model):
     __tablename__ = 'FOOD_POSTS'
@@ -69,24 +69,6 @@ class InstaLoc(db.Model):
                 self.insta_loc_id, self.name, self.lat, self.lng, self.address, self.category)
 
 def create_tables():
-    # # Create INSTA_LOC Table
-    # try:
-    #     conn = mysql.connect()
-    #     cursor = conn.cursor()
-    #     result = cursor.execute("CREATE TABLE IF NOT EXISTS INSTA_LOC ( INSTA_LOC_ID INT NOT NULL, NAME VARCHAR(100), LAT VARCHAR(20), LNG VARCHAR(20), ADDRESS VARCHAR(200), CATEGORY VARCHAR(200), PRIMARY KEY (INSTA_LOC_ID) );")
-    #     # print result, str(cursor.fetchall())
-    # except Exception as e:
-    #     print "Exception!" + str(e)
-
-    # # Create FOOD_POSTS Table
-    # try:
-    #     conn = mysql.connect()
-    #     cursor = conn.cursor()
-    #     result = cursor.execute("CREATE TABLE IF NOT EXISTS FOOD_POSTS ( INSTA_ID VARCHAR(50) NOT NULL, INSTA_TEXT VARCHAR(2200), INSTA_LOC_ID INT NULL, INSTA_IMG_FULL VARCHAR(250), INSTA_IMG_THUMB VARCHAR(250), USERNAME VARCHAR(20), INSTA_POST_DATE TIMESTAMP, INSTA_LOC_NAME VARCHAR(100) NOT NULL DEFAULT '', FOOD_NAME VARCHAR(100), INSTA_IMG_MED VARCHAR(250), PRIMARY KEY (INSTA_ID), FOREIGN KEY (INSTA_LOC_ID) REFERENCES INSTA_LOC(INSTA_LOC_ID) );")
-    #     # print result, str(cursor.fetchall())
-    # except Exception as e:
-    #     print "Exception!" + str(e)
-
     db.create_all()
     print "create_tables complete", db.metadata.tables.items()
 
@@ -96,53 +78,50 @@ def populate_table(filename='json_output.json'):
         posts = json.load(data_file)
         # Loop through posts and add them to DB
         for item in posts:
-            add_item_to_table(item)
-            print item["id"] + " added"
-
-    conn = mysql.connect()
-    cursor = conn.cursor()
-    result = cursor.execute("SELECT * FROM FOOD_POSTS")
-    # print result, str(cursor.fetchall())
-    # print "populate_table complete"
-    cursor.close()
-    conn.close()
+            try:
+                add_item_to_table(item)
+                print item["id"] + " added"
+            except Exception as e:
+                print item["id"] + " was NOT added"
+                print "Error:", e
+            break
 
 def add_item_to_table(item):
-    try:
-        INSTA_ID = item["code"]
-        INSTA_TEXT = item["caption"]["text"] if item["caption"] else ""
-        # INSTA_LOC_ID = item.location.id
-        INSTA_LOC_NAME = item["location"]["name"] if item["location"] else ""
-        INSTA_IMG_FULL = item["images"]["standard_resolution"]["url"] if item["images"] and item["images"]["standard_resolution"] else ""
-        INSTA_IMG_THUMB = item["images"]["thumbnail"]["url"] if item["images"] and item["images"]["thumbnail"] else ""
-        INSTA_IMG_MED = item["images"]["low_resolution"]["url"] if item["images"] and item["images"]["low_resolution"] else ""
-        USERNAME = item["user"]["username"]
-        INSTA_POST_DATE = int(item["created_time"])
+    INSTA_ID = item["code"]
+    INSTA_TEXT = item["caption"]["text"] if item["caption"] else ""
+    # INSTA_LOC_ID = item.location.id
+    INSTA_LOC_NAME = item["location"]["name"] if item["location"] else ""
+    INSTA_IMG_FULL = item["images"]["standard_resolution"]["url"] if item["images"] and item["images"]["standard_resolution"] else ""
+    INSTA_IMG_THUMB = item["images"]["thumbnail"]["url"] if item["images"] and item["images"]["thumbnail"] else ""
+    INSTA_IMG_MED = item["images"]["low_resolution"]["url"] if item["images"] and item["images"]["low_resolution"] else ""
+    USERNAME = item["user"]["username"]
+    INSTA_POST_DATE = datetime.datetime.utcfromtimestamp(
+        int(item["created_time"])
+    )
 
-        # print "Item INFO:",INSTA_ID,INSTA_TEXT,INSTA_IMG_FULL,INSTA_IMG_THUMB,USERNAME,INSTA_POST_DATE
-        conn = mysql.connect()
-        cursor = conn.cursor()
-        result = cursor.execute("INSERT INTO FOOD_POSTS "
-                                "(INSTA_ID, INSTA_TEXT, INSTA_IMG_FULL, INSTA_IMG_THUMB, USERNAME, INSTA_POST_DATE, INSTA_LOC_NAME, INSTA_IMG_MED) "
-                                "VALUES (%s, %s, %s, %s, %s, FROM_UNIXTIME(%s), %s, %s)", 
-                                ( INSTA_ID, INSTA_TEXT, INSTA_IMG_FULL, INSTA_IMG_THUMB, USERNAME, INSTA_POST_DATE, INSTA_LOC_NAME, INSTA_IMG_MED))
-        conn.commit()
-        print "Inserted "+INSTA_ID, result, str(cursor.fetchall())
-        
-    except Exception as e:
-        print "Exception! for ",INSTA_ID
-        print str(item)
-        print str(e)
+    # print "Item INFO:",INSTA_ID,INSTA_TEXT,INSTA_IMG_FULL,INSTA_IMG_THUMB,USERNAME,INSTA_POST_DATE
+    # conn = mysql.connect()
+    # cursor = conn.cursor()
+    # result = cursor.execute("INSERT INTO FOOD_POSTS "
+    #                         "(INSTA_ID, INSTA_TEXT, INSTA_IMG_FULL, INSTA_IMG_THUMB, USERNAME, INSTA_POST_DATE, INSTA_LOC_NAME, INSTA_IMG_MED) "
+    #                         "VALUES (%s, %s, %s, %s, %s, FROM_UNIXTIME(%s), %s, %s)", 
+    #                         ( INSTA_ID, INSTA_TEXT, INSTA_IMG_FULL, INSTA_IMG_THUMB, USERNAME, INSTA_POST_DATE, INSTA_LOC_NAME, INSTA_IMG_MED))
+    # conn.commit()
+    # print "Inserted "+INSTA_ID, result, str(cursor.fetchall())
+    
+    new_entry = FoodPost(insta_id=INSTA_ID,
+                        insta_text=INSTA_TEXT,
+                        insta_loc_id=None,
+                        insta_img_full=INSTA_IMG_FULL,
+                        insta_img_thumb=INSTA_IMG_THUMB,
+                        insta_img_med=INSTA_IMG_MED,
+                        username=USERNAME,
+                        insta_post_date=INSTA_POST_DATE,
+                        insta_loc_name=INSTA_LOC_NAME,
+                        food_name="")
 
-    finally:
-        try:
-            cursor.close()
-        except NameError:
-            print "Name Error for cursor"
-        try:
-            conn.close()
-        except NameError:
-            print "Name Error for conn"
+    db.session.add(new_entry)
+    db.session.commit()
 
 def populate_locations():
     # Open JSON file
@@ -219,12 +198,10 @@ def feed():
         paginated_posts = FoodPost.query.order_by(FoodPost.insta_post_date.desc()).paginate(page, LIMIT, False)
     except Exception as e:
         return render_template("error.html", title="QUERY Error", msg=str(e))
-    # pdb.set_trace()
 
     return render_template("search-post-results.html",
                             posts=paginated_posts.items,
-                            pagination=paginated_posts,
-                            msg="has_next {} | has_prev {} |".format(paginated_posts.has_next, paginated_posts.has_prev))
+                            pagination=paginated_posts)
 
 @app.route("/save/<insta_id>", methods=["POST"])
 def save(insta_id):
@@ -274,7 +251,7 @@ def search():
 
 @app.route("/post/<insta_id>")
 def post(insta_id):
-    
+
     post = []
     try:
         post = FoodPost.query.filter_by(insta_id=insta_id).first()
@@ -315,7 +292,7 @@ if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
 
-    create_tables()
+    # create_tables()
     # populate_table("brianeatss_media_dump.json")
     # populate_table("kamikaz1_k_media_dump.json")
     # populate_table()
