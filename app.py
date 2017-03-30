@@ -98,16 +98,6 @@ def add_item_to_table(item):
     INSTA_POST_DATE = datetime.datetime.utcfromtimestamp(
         int(item["created_time"])
     )
-
-    # print "Item INFO:",INSTA_ID,INSTA_TEXT,INSTA_IMG_FULL,INSTA_IMG_THUMB,USERNAME,INSTA_POST_DATE
-    # conn = mysql.connect()
-    # cursor = conn.cursor()
-    # result = cursor.execute("INSERT INTO FOOD_POSTS "
-    #                         "(INSTA_ID, INSTA_TEXT, INSTA_IMG_FULL, INSTA_IMG_THUMB, USERNAME, INSTA_POST_DATE, INSTA_LOC_NAME, INSTA_IMG_MED) "
-    #                         "VALUES (%s, %s, %s, %s, %s, FROM_UNIXTIME(%s), %s, %s)", 
-    #                         ( INSTA_ID, INSTA_TEXT, INSTA_IMG_FULL, INSTA_IMG_THUMB, USERNAME, INSTA_POST_DATE, INSTA_LOC_NAME, INSTA_IMG_MED))
-    # conn.commit()
-    # print "Inserted "+INSTA_ID, result, str(cursor.fetchall())
     
     new_entry = FoodPost(insta_id=INSTA_ID,
                         insta_text=INSTA_TEXT,
@@ -126,7 +116,6 @@ def add_item_to_table(item):
 # Routing Definitions
 @app.route("/")
 def main():
-    # return render_template("index.html")
     return redirect(url_for('feed'))
 
 @app.route("/list")
