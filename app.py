@@ -123,41 +123,6 @@ def add_item_to_table(item):
     db.session.add(new_entry)
     db.session.commit()
 
-def populate_locations():
-    # Open JSON file
-    with open('json_output.json') as data_file: 
-        posts = json.load(data_file)
-        # Loop through posts and add them to DB
-        for item in posts:
-            add_location_to_item(item)
-            print item["id"] + " updated"
-
-
-def add_location_to_item(item):
-    try:
-        INSTA_ID = item["id"]
-        INSTA_LOC_NAME = item["location"]["name"]
-
-        # print "Item INFO:",INSTA_ID,INSTA_TEXT,INSTA_IMG_FULL,INSTA_IMG_THUMB,USERNAME,INSTA_POST_DATE
-        conn = mysql.connect()
-        cursor = conn.cursor()
-        result = cursor.execute("UPDATE FOOD_POSTS SET INSTA_LOC_NAME=%s WHERE INSTA_ID=%s", (INSTA_LOC_NAME, INSTA_ID))
-        conn.commit()
-        print "Inserted "+INSTA_ID, result, str(cursor.fetchall())
-        
-    except Exception as e:
-        print "Exception! for " + INSTA_ID + " " + INSTA_LOC_NAME + " -> " + str(e)
-
-    finally:
-        try:
-            cursor.close()
-        except NameError:
-            print "Name Error for cursor"
-        try:
-            conn.close()
-        except NameError:
-            print "Name Error for conn"
-
 # Routing Definitions
 @app.route("/")
 def main():
@@ -296,4 +261,3 @@ if __name__ == "__main__":
     # populate_table("brianeatss_media_dump.json")
     # populate_table("kamikaz1_k_media_dump.json")
     # populate_table()
-    # populate_locations()
