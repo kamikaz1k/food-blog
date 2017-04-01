@@ -3,11 +3,12 @@
  
 <head>
     <title>ERROR</title>
-    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% include 'partials/styles.html' %}
 </head>
  
 <body>
  
+    {% include 'partials/navbar.html' %}
     <div class="container">
         <p>Error: {{title}}</p>
         <p>{{msg}}</p>

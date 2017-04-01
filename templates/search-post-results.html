@@ -5,7 +5,8 @@
     <title>Food Items</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% include 'partials/styles.html' %}
+    
     <style>
         .media {
             /*border: 2px solid black;*/
@@ -17,17 +18,7 @@
  
 <body>
  
-    <div class="container">
-        <div class="header">
-            <nav>
-                <ul class="nav nav-pills pull-right">
-                    <li role="presentation"><a href="/">Home</a>
-                    </li>
-                </ul>
-            </nav>
-            <h3 class="text-muted">Food Blog</h3>
-        </div>
-    </div>
+    {% include 'partials/navbar.html' %}
 
     {% if msg %}
     <div class="container">
