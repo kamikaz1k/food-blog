@@ -189,6 +189,7 @@ def save(insta_id):
 def search():
     # Valid search params
     LOCATION = "%{}%".format(request.args.get("location_name",""))
+    TEXT = "%{}%".format(request.args.get("food-text",""))
     FOOD_NAME = "%{}%".format(request.args.get("food_name",""))
     USERNAME = "%{}%".format(request.args.get("poster",""))
 
@@ -201,7 +202,10 @@ def search():
 
     try:
         paginated_posts = FoodPost.query.order_by(FoodPost.insta_post_date.desc()) \
-                                    .filter(FoodPost.insta_loc_name.ilike(LOCATION), FoodPost.food_name.ilike(FOOD_NAME), FoodPost.username.ilike(USERNAME)) \
+                                    .filter(FoodPost.insta_loc_name.ilike(LOCATION),
+                                            FoodPost.food_name.ilike(FOOD_NAME),
+                                            FoodPost.insta_text.ilike(TEXT),
+                                            FoodPost.username.ilike(USERNAME)) \
                                     .paginate(PAGE_NUM, LIMIT, False)
     except Exception as e:
         return render_template("error.html", title="QUERY Error", msg=str(e))
