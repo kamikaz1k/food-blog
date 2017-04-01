@@ -226,6 +226,9 @@ def post(insta_id):
     except Exception as e:
         return render_template("error.html", title="QUERY Error", msg=str(e))
 
+    if post is None:
+        return render_template("error.html", title="Post not found...", msg="Post not found...how did you get here?")
+
     # Parse all the explore tag options
     # For Location split the words
     # And filter out the empty strings
