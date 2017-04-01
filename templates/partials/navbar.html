@@ -2,13 +2,14 @@
 document.addEventListener('DOMContentLoaded', function navbarListener() {
 
   document.querySelector(".navbar-toggle").addEventListener("click", function() {
-    
+
     var target = document.getElementById(this.attributes["data-target"].value.slice(1));
 
     if (target.className.split(" ").indexOf("in") > -1) {
       target.classList.remove("in");
     } else {
       target.classList.add("in");
+      document.querySelector("#navbar-search-input").focus();
     }
 
   });
@@ -28,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function navbarListener() {
       <form class="navbar-form navbar-right" action="/search">
         <div class="form-group has-feedback">
             <!-- <label class="control-label">Search</label> -->
-            <input type="text" class="form-control" placeholder="Search..." name="food-text" style="border-radius:25px;"/>
+            <input type="text" class="form-control" placeholder="Search..." id="navbar-search-input" name="food-text" style="border-radius:25px;">
             <button style="padding-left:8px" class="btn btn-link form-control-feedback" type="submit">
               <i class="glyphicon glyphicon-search"></i>
             </button>
