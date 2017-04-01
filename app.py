@@ -68,6 +68,12 @@ class InstaLoc(db.Model):
         return "<FoodPost(insta_loc_id='%s', name='%s', lat='%s', lng='%s', address='%s', category='%s')>" % (
                 self.insta_loc_id, self.name, self.lat, self.lng, self.address, self.category)
 
+def parse_page_number(val):
+    try:
+        return int(val)
+    except Exception as e:
+        return -1
+
 def create_tables():
     db.create_all()
     print "create_tables complete", db.metadata.tables.items()
@@ -121,10 +127,12 @@ def main():
 @app.route("/list")
 def list():
     LIMIT = 10
-    page = int(request.args.get('page', '1'))
+    PAGE_NUM = int(request.args.get('page', 1))
+    if PAGE_NUM < 1:
+        return redirect(url_for("list", page=1))
 
     try:
-        paginated_posts = FoodPost.query.order_by(FoodPost.insta_post_date.desc()).paginate(page, LIMIT, False)
+        paginated_posts = FoodPost.query.order_by(FoodPost.insta_post_date.desc()).paginate(PAGE_NUM, LIMIT, False)
     except Exception as e:
         return render_template("error.html", title="QUERY Error", msg=str(e))
 
@@ -143,17 +151,17 @@ def detail(insta_id):
 
 @app.route("/feed")
 def feed():
-    page = int(request.args.get('page', '1'))
-
-    # Setup Query Params
     LIMIT = 10
+    PAGE_NUM = parse_page_number(request.args.get('page', 1))
+    if PAGE_NUM < 1:
+        return redirect(url_for("feed", page=1))
 
     try:
-        paginated_posts = FoodPost.query.order_by(FoodPost.insta_post_date.desc()).paginate(page, LIMIT, False)
+        paginated_posts = FoodPost.query.order_by(FoodPost.insta_post_date.desc()).paginate(PAGE_NUM, LIMIT, False)
     except Exception as e:
         return render_template("error.html", title="QUERY Error", msg=str(e))
 
-    return render_template("search-post-results.html",
+    return render_template("feed-results.html",
                             posts=paginated_posts.items,
                             pagination=paginated_posts)
 
@@ -183,7 +191,10 @@ def search():
     LOCATION = "%{}%".format(request.args.get("location_name",""))
     FOOD_NAME = "%{}%".format(request.args.get("food_name",""))
     USERNAME = "%{}%".format(request.args.get("poster",""))
-    page = int(request.args.get('page', '1'))
+
+    PAGE_NUM = parse_page_number(request.args.get('page', 1))
+    if PAGE_NUM < 1:
+        return redirect(url_for("search", page=1, location_name=LOCATION, food_name=FOOD_NAME, poster=USERNAME))
 
     # Setup Query Params
     LIMIT = 10
@@ -191,17 +202,16 @@ def search():
     try:
         paginated_posts = FoodPost.query.order_by(FoodPost.insta_post_date.desc()) \
                                     .filter(FoodPost.insta_loc_name.ilike(LOCATION), FoodPost.food_name.ilike(FOOD_NAME), FoodPost.username.ilike(USERNAME)) \
-                                    .paginate(page, LIMIT, False)
+                                    .paginate(PAGE_NUM, LIMIT, False)
     except Exception as e:
         return render_template("error.html", title="QUERY Error", msg=str(e))
 
     return render_template("search-post-results.html",
                             posts=paginated_posts.items,
                             pagination=paginated_posts,
-                            page=page,
                             location_name=LOCATION[1:-1],
                             food_name=FOOD_NAME[1:-1],
-                            msg="LOCATION: {} | FOOD_NAME: {} | USERNAME: {} | Page: {}".format(LOCATION, FOOD_NAME, USERNAME, page))
+                            msg="LOCATION: {} | FOOD_NAME: {} | USERNAME: {} | Page: {}".format(LOCATION, FOOD_NAME, USERNAME, PAGE_NUM))
 
 @app.route("/post/<insta_id>")
 def post(insta_id):

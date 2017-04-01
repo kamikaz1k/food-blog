@@ -4,5 +4,6 @@
 * ~Add pagination to list page~
 * Add a landing page
 * ~Create layout for posting page~
-* Error handling for page = non integer value
-* Fix pagination links for search page
+* ~Error handling for page = non integer value~
+* ~Fix pagination links for search page~
+* Fix issues with searching for special characters (大有名糖)
