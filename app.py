@@ -5,6 +5,8 @@ import pdb
 import datetime
 from flask_sqlalchemy import SQLAlchemy
 
+import insta_scraper as isc
+
 if 'DATABASE_URL' not in os.environ:
     raise Exception("DATABASE_URL not set in os.environ")
     
@@ -257,6 +259,15 @@ def post(insta_id):
                             name_tags=name_tags, 
                             location_tags=location_tags, 
                             msg='location_tags + "::"' + str(location_tags))
+
+@app.route("/userSync", methods=["GET","POST"])
+def userSync():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        return render_template("error.html", msg="Starting process for {}".format(username))
+    else:
+        return render_template("user-sync.html")
 
 if __name__ == "__main__":
     # print "DATABASE_URL: " + url
