@@ -2,3 +2,8 @@ Flask==0.11
 Flask-SQLAlchemy==2.1
 Jinja2==2.8
 Werkzeug==0.11.10
+requests>=1.0.4
+futures==2.2.0
+tqdm>=3.8.0
+requests_mock
+nose
