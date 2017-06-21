@@ -5,7 +5,9 @@ import pdb
 import datetime
 from flask_sqlalchemy import SQLAlchemy
 
-import insta_scraper as isc
+from insta_scraper import call_main as scraper
+
+import threading
 
 if 'DATABASE_URL' not in os.environ:
     raise Exception("DATABASE_URL not set in os.environ")
@@ -16,6 +18,8 @@ app = Flask(__name__)
 # MySQL configurations
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SQLALCHEMY_ECHO'] = False
+app.config['WORKER_QUEUE'] = []
+app.config['WORKER_RUNNING'] = False
 db = SQLAlchemy(app)
 
 db.create_all()
@@ -265,9 +269,54 @@ def userSync():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        queueScrape(username, password)
         return render_template("error.html", msg="Starting process for {}".format(username))
     else:
         return render_template("user-sync.html")
+
+def runScraper(username, password, cb):
+    app.logger.debug("Starting worker...")
+    try:
+        filename = scraper(username, password)
+        app.logger.debug("Output filename - {}".format(filename))
+    except Exception as e:
+        app.logger.error(str(e))
+    # Callback after jobs done
+    app.logger.debug("Worker done.")
+
+    cb()
+
+def queueScrape(username, password):
+    # If something is running, or if there's something queued
+    # queue this job
+    if app.config['WORKER_RUNNING'] or len(app.config['WORKER_QUEUE']):
+        app.config['WORKER_QUEUE'].append({ "username": username, "password": password })
+        app.logger.debug("Queueing scrape request...")
+        app.logger.debug(app.config['WORKER_QUEUE'])
+    # If nothing is running, and queue is empty
+    # start job without queueing
+    else:
+        app.config['WORKER_RUNNING'] = True
+        t = threading.Thread(target=runScraper, args=(username,password,consumeScrape))
+        t.start()
+
+def consumeScrape():
+    app.config['WORKER_RUNNING'] = False
+
+    # If there are queued items, start the head
+    if len(app.config['WORKER_QUEUE']):
+
+        username = app.config['WORKER_QUEUE'][0]['username']
+        password = app.config['WORKER_QUEUE'][0]['password']
+
+        app.config['WORKER_QUEUE'] = app.config['WORKER_QUEUE'][1:]
+
+        app.config['WORKER_RUNNING'] = True
+        t = threading.Thread(target=runScraper, args=(username,password,consumeScrape))
+        t.start()
+    # Otherwise, do nothing
+    else:
+        app.logger.debug("Queue is empty.")
 
 if __name__ == "__main__":
     # print "DATABASE_URL: " + url
