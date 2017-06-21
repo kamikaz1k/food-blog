@@ -1,4 +1,4 @@
-from flask import Flask, render_template, json, request, redirect, session, url_for
+from flask import Flask, render_template, json, request, redirect, session, url_for, flash
 import os
 import re
 import pdb
@@ -14,6 +14,8 @@ if 'DATABASE_URL' not in os.environ:
     
 # App Configurations
 app = Flask(__name__)
+
+app.secret_key = os.environ.get('SECRET_KEY', 'a_sekret_key')
 
 # MySQL configurations
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
@@ -277,7 +279,8 @@ def userSync():
         username = request.form['username']
         password = request.form['password']
         queueScrape(username, password)
-        return render_template("error.html", msg="Starting process for {}".format(username))
+        flash("Starting process for {}".format(username))
+        return redirect(url_for('userSync'))
     else:
         return render_template("user-sync.html")
 
