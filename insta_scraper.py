@@ -140,7 +140,7 @@ class InstagramScraper(object):
 
     def write_to_file(self, item, username):
         target = open(self.create_file_name(username), 'a')
-        target.write(str(json.dumps(item)) + ',\n')
+        target.write(str(json.dumps(item)) + '\n')
         target.close()
 
     def create_file_name(self, username):
