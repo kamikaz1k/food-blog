@@ -87,16 +87,17 @@ def create_tables():
 def populate_table(filename='json_output.json'):
     # Open JSON file
     with open(filename) as data_file: 
-        posts = json.load(data_file)
         # Loop through posts and add them to DB
-        for item in posts:
+        for line in data_file:
+            post = json.loads(line)
             try:
-                add_item_to_table(item)
-                print item["id"] + " added"
+                add_item_to_table(post)
+                app.logger.debug(post["id"] + " added")
             except Exception as e:
-                print item["id"] + " was NOT added"
-                print "Error:", e
-            break
+                # import pdb;pdb.set_trace()
+                app.logger.debug(post["id"] + " was NOT added")
+                app.logger.error(e)
+                # e.orig is for the duplicate key error
 
 def add_item_to_table(item):
     INSTA_ID = item["code"]
@@ -122,8 +123,14 @@ def add_item_to_table(item):
                         insta_loc_name=INSTA_LOC_NAME,
                         food_name="")
 
-    db.session.add(new_entry)
-    db.session.commit()
+    try:
+        db.session.add(new_entry)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+    # finally:
+    #     db.session.close()
 
 # Routing Definitions
 @app.route("/")
@@ -274,8 +281,9 @@ def userSync():
     else:
         return render_template("user-sync.html")
 
-def runScraper(username, password, cb):
+def runScraper(username, password, populate_db, cb):
     app.logger.debug("Starting worker...")
+    filename = False
     try:
         filename = scraper(username, password)
         app.logger.debug("Output filename - {}".format(filename))
@@ -283,6 +291,9 @@ def runScraper(username, password, cb):
         app.logger.error(str(e))
     # Callback after jobs done
     app.logger.debug("Worker done.")
+
+    if filename:
+        populate_db(filename)
 
     cb()
 
@@ -297,7 +308,7 @@ def queueScrape(username, password):
     # start job without queueing
     else:
         app.config['WORKER_RUNNING'] = True
-        t = threading.Thread(target=runScraper, args=(username,password,consumeScrape))
+        t = threading.Thread(target=runScraper, args=(username,password,populate_table,consumeScrape))
         t.start()
 
 def consumeScrape():
@@ -312,7 +323,7 @@ def consumeScrape():
         app.config['WORKER_QUEUE'] = app.config['WORKER_QUEUE'][1:]
 
         app.config['WORKER_RUNNING'] = True
-        t = threading.Thread(target=runScraper, args=(username,password,consumeScrape))
+        t = threading.Thread(target=runScraper, args=(username,password,populate_table,consumeScrape))
         t.start()
     # Otherwise, do nothing
     else:
