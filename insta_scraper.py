@@ -38,6 +38,8 @@ class InstagramScraper(object):
         self.cookies = None
         self.logged_in = False
 
+        self.SCRAPE_DIR = "./scrapes"
+
         if self.login_user and self.login_pass:
             self.login()
 
@@ -123,7 +125,7 @@ class InstagramScraper(object):
                                 unit=' media', disable=self.quiet):
                 # future = executor.submit(self.download, item, dst)
                 # future_to_item[future] = item
-                self.write_to_file(item=item, username=username, filename="_media_dump.json")
+                self.write_to_file(item=item, username=username)
 
             # Displays the progress bar of completed downloads. Might not even pop up if all media is downloaded while
             # the above loop finishes.
@@ -136,13 +138,13 @@ class InstagramScraper(object):
 
         self.logout()
 
-    def write_to_file(self, item, username, filename='_json_output.txt'):
-        # print str(item);
-        SCRAPE_DIR = "./scrapes"
-        target = open(os.path.join(SCRAPE_DIR, "{}_{}".format(username,filename)), 'a')
+    def write_to_file(self, item, username):
+        target = open(self.create_file_name(username), 'a')
         target.write(str(json.dumps(item)) + ',\n')
         target.close()
 
+    def create_file_name(self, username):
+        return os.path.join(self.SCRAPE_DIR, "{}_json_output.txt".format(username))
 
     def fetch_user(self, username):
         """Fetches the user's metadata"""
@@ -302,6 +304,7 @@ def main():
 def call_main(username, password):
     scraper = InstagramScraper(username, username, password)
     scraper.scrape()
+    return scraper.create_file_name(username)
 
 if __name__ == '__main__':
     main()
