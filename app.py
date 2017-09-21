@@ -11,7 +11,7 @@ import threading
 
 if 'DATABASE_URL' not in os.environ:
     raise Exception("DATABASE_URL not set in os.environ")
-    
+
 # App Configurations
 app = Flask(__name__)
 
@@ -19,6 +19,7 @@ app.secret_key = os.environ.get('SECRET_KEY', 'a_sekret_key')
 
 # MySQL configurations
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+app.config['SQLALCHEMY_POOL_RECYCLE'] = os.environ['DATABASE_POOL_RECYCLE']
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['WORKER_QUEUE'] = []
 app.config['WORKER_RUNNING'] = False
@@ -88,7 +89,7 @@ def create_tables():
 
 def populate_table(filename='json_output.json'):
     # Open JSON file
-    with open(filename) as data_file: 
+    with open(filename) as data_file:
         # Loop through posts and add them to DB
         for line in data_file:
             post = json.loads(line)
@@ -113,7 +114,7 @@ def add_item_to_table(item):
     INSTA_POST_DATE = datetime.datetime.utcfromtimestamp(
         int(item["created_time"])
     )
-    
+
     new_entry = FoodPost(insta_id=INSTA_ID,
                         insta_text=INSTA_TEXT,
                         insta_loc_id=None,
@@ -261,16 +262,16 @@ def post(insta_id):
     # Hash tags
     # re.findall("#\w+",posts[0][1])
 
-    return render_template("view-post.html", 
+    return render_template("view-post.html",
                             food_name=post.food_name,
                             food_caption=post.insta_text,
                             location_name=post.insta_loc_name,
                             image_link=post.insta_img_full,
                             post_date=post.insta_post_date,
                             username=post.username,
-                            post_id=post.insta_id, 
-                            name_tags=name_tags, 
-                            location_tags=location_tags, 
+                            post_id=post.insta_id,
+                            name_tags=name_tags,
+                            location_tags=location_tags,
                             msg='location_tags + "::"' + str(location_tags))
 
 @app.route("/userSync", methods=["GET","POST"])
