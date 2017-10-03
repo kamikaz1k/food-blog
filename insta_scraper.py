@@ -129,7 +129,7 @@ class InstagramScraper(object):
                         future_to_item[future] = item
 
             # Crawls the media and sends it to the executor.
-            for item in tqdm.tqdm(self.media_gen(username), desc='Searching {0} for posts'.format(username), 
+            for item in tqdm.tqdm(self.media_gen(username), desc='Searching {0} for posts'.format(username),
                                 unit=' media', disable=self.quiet):
                 # future = executor.submit(self.download, item, dst)
                 # future_to_item[future] = item
@@ -152,6 +152,8 @@ class InstagramScraper(object):
         target.close()
 
     def create_file_name(self, username):
+        if not os.path.exists(self.SCRAPE_DIR):
+            os.makedirs(self.SCRAPE_DIR)
         return os.path.join(self.SCRAPE_DIR, "{}_json_output.txt".format(username))
 
     def fetch_user(self, username):
