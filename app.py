@@ -4,6 +4,7 @@ import re
 import pdb
 import datetime
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import load_only
 
 from insta_scraper import call_main as scraper
 
@@ -87,20 +88,42 @@ def create_tables():
     db.create_all()
     print "create_tables complete", db.metadata.tables.items()
 
-def populate_table(filename='json_output.json'):
+def populate_table(filename, username):
+
+    if filename is None or username is None:
+        return
+
+    # Get list of IDs first
+    try:
+        user_posts = FoodPost.query.filter(FoodPost.username.ilike(username)).options(load_only("insta_id"))
+        user_posts_ids = []
+        for item in user_posts:
+            user_posts_ids.append(item.insta_id)
+
+    except Exception as e:
+        app.logger.error("Exception in user_posts query after sync:")
+        app.logger.error(e)
+
     # Open JSON file
     with open(filename) as data_file:
+        errors = 0;
         # Loop through posts and add them to DB
         for line in data_file:
             post = json.loads(line)
             try:
+                if post["code"] in user_posts_ids:
+                    errors += 1
+                    raise Exception("Post already exists")
                 add_item_to_table(post)
                 app.logger.debug(post["id"] + " added")
             except Exception as e:
-                # import pdb;pdb.set_trace()
-                app.logger.debug(post["id"] + " was NOT added")
+                app.logger.error(post["id"] + " was NOT added. No. of errors: {}".format(errors))
                 app.logger.error(e)
                 # e.orig is for the duplicate key error
+
+    # Then delete the file
+    app.logger.debug("Removing json dump file: {}".format(filename))
+    os.remove(filename)
 
 def add_item_to_table(item):
     INSTA_ID = item["code"]
@@ -297,7 +320,7 @@ def runScraper(username, password, populate_db, cb):
     app.logger.debug("Worker done.")
 
     if filename:
-        populate_db(filename)
+        populate_db(filename, username)
 
     cb()
 
@@ -334,11 +357,9 @@ def consumeScrape():
         app.logger.debug("Queue is empty.")
 
 if __name__ == "__main__":
-    # print "DATABASE_URL: " + url
+
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
 
     # create_tables()
-    # populate_table("brianeatss_media_dump.json")
-    # populate_table("kamikaz1_k_media_dump.json")
     # populate_table()
