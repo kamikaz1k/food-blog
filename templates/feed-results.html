@@ -69,7 +69,7 @@
         {% for entry_row in posts | batch(3) %}
         <div class="row">
             {% for entry in entry_row %}
-            <div class="col-md-4">
+            <div class="col-sm-4 col-md-4">
                 <a href="{{'/post/' + entry.insta_id}}" class="list-group-item feed-item">
                     <img class="media-object center-image" src="{{entry.insta_img_med}}" alt="thumbnail">
                     <p class="list-group-item-text feed-item-name">
