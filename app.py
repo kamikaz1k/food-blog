@@ -294,8 +294,7 @@ def post(insta_id):
                             username=post.username,
                             post_id=post.insta_id,
                             name_tags=name_tags,
-                            location_tags=location_tags,
-                            msg='location_tags + "::"' + str(location_tags))
+                            location_tags=location_tags)
 
 @app.route("/userSync", methods=["GET","POST"])
 def userSync():
