@@ -42,36 +42,36 @@
     {% endif %}
 
     <div class="container">
-        <div class="col-md-6 col-md-offset-3">
-            <nav aria-label="Page navigation">
-              <ul class="pagination">
-                {% for page in pagination.iter_pages() %}
+        <nav aria-label="Page navigation">
+          <ul class="pagination">
+            {% for page in pagination.iter_pages() %}
 
-                {% if page == None %}
-                <li>
-                    <a href="/">...</a>
-                </li>
-                {% elif page != pagination.page %}
-                <li>
-                  <a href="/feed?page={{page}}" aria-label="Previous">
-                    <span aria-hidden="true">{{page}}</span>
-                  </a>
-                </li>
-                {% else %}
-                <li class="active">
-                    <a href="/feed?page={{page}}">{{page}}</a>
-                </li>
-                {% endif %}
+            {% if page == None %}
+            <li>
+                <a href="/">...</a>
+            </li>
+            {% elif page != pagination.page %}
+            <li>
+              <a href="/feed?page={{page}}" aria-label="Previous">
+                <span aria-hidden="true">{{page}}</span>
+              </a>
+            </li>
+            {% else %}
+            <li class="active">
+                <a href="/feed?page={{page}}">{{page}}</a>
+            </li>
+            {% endif %}
 
-                {% endfor %}
-              </ul>
-            </nav>
+            {% endfor %}
+          </ul>
+        </nav>
 
-            <div class="list-group">
-
-                {% for entry in posts %}
+        {% for entry_row in posts | batch(3) %}
+        <div class="row">
+            {% for entry in entry_row %}
+            <div class="col-md-4">
                 <a href="{{'/post/' + entry.insta_id}}" class="list-group-item feed-item">
-                    <img class="media-object center-image" src="{{entry.insta_img_thumb}}" alt="thumbnail">
+                    <img class="media-object center-image" src="{{entry.insta_img_med}}" alt="thumbnail">
                     <p class="list-group-item-text feed-item-name">
                         {% if entry.food_name %}
                             {{ entry.food_name }}
@@ -81,34 +81,34 @@
                          @ {{entry.insta_loc_name}}
                     </p>
                 </a>
-                {% endfor %}
-
             </div>
-
-            <nav aria-label="Page navigation">
-              <ul class="pagination">
-                {% for page in pagination.iter_pages() %}
-
-                {% if page == None %}
-                <li>
-                    <a href="/">...</a>
-                </li>
-                {% elif page != pagination.page %}
-                <li>
-                  <a href="/feed?page={{page}}" aria-label="Previous">
-                    <span aria-hidden="true">{{page}}</span>
-                  </a>
-                </li>
-                {% else %}
-                <li class="active">
-                    <a href="/feed?page={{page}}">{{page}}</a>
-                </li>
-                {% endif %}
-
-                {% endfor %}
-              </ul>
-            </nav>
+            {% endfor %}
         </div>
+        {% endfor %}
+
+        <nav aria-label="Page navigation">
+          <ul class="pagination">
+            {% for page in pagination.iter_pages() %}
+
+            {% if page == None %}
+            <li>
+                <a href="/">...</a>
+            </li>
+            {% elif page != pagination.page %}
+            <li>
+              <a href="/feed?page={{page}}" aria-label="Previous">
+                <span aria-hidden="true">{{page}}</span>
+              </a>
+            </li>
+            {% else %}
+            <li class="active">
+                <a href="/feed?page={{page}}">{{page}}</a>
+            </li>
+            {% endif %}
+
+            {% endfor %}
+          </ul>
+        </nav>
     </div>
 
 </body>
