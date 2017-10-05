@@ -249,12 +249,15 @@ def search():
     except Exception as e:
         return render_template("error.html", title="QUERY Error", msg=str(e))
 
+    query_string = "&".join(["{}={}".format(k, request.args.get(k)) for k in request.args.keys()])
+
+    if query_string != "":
+        query_string = "&" + query_string
+
     return render_template("search-post-results.html",
                             posts=paginated_posts.items,
                             pagination=paginated_posts,
-                            location_name=LOCATION[1:-1],
-                            food_name=FOOD_NAME[1:-1],
-                            msg="LOCATION: {} | FOOD_NAME: {} | USERNAME: {} | Page: {}".format(LOCATION, FOOD_NAME, USERNAME, PAGE_NUM))
+                            query_string=query_string)
 
 @app.route("/post/<insta_id>")
 def post(insta_id):

@@ -1,23 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
- 
+
 <head>
     <title>Food Items</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% include 'partials/styles.html' %}
-    
     <style>
         .media {
             /*border: 2px solid black;*/
             /*padding: 20px;*/
             margin-bottom: 50px;
         }
+        nav {
+            text-align: center;
+        }
+        .center-image {
+            margin: auto;
+            height: 100%;
+            width: 100%;
+        }
+        .feed-item {
+            text-align: center;
+            padding: 0px;
+        }
+        .feed-item-name {
+            padding: 10px;
+        }
+        .feed-row {
+            margin-bottom: 35px;
+        }
     </style>
 </head>
- 
+
 <body>
- 
+
     {% include 'partials/navbar.html' %}
 
     {% if msg %}
@@ -27,56 +44,6 @@
     {% endif %}
 
     <div class="container">
-        <div class="col-md-8 col-md-offset-2">
-        <nav aria-label="Page navigation">
-          <ul class="pagination">
-            {% for page in pagination.iter_pages() %}
-
-            {% if page == None %}
-            <li class="disabled">
-                <a href="/">...</a>
-            </li>
-            {% elif page != pagination.page %}
-            <li>
-              <a href="/search?location_name={{location_name}}&food_name&{{food_name}}&page={{page}}" aria-label="Previous">
-                <span aria-hidden="true">{{page}}</span>
-              </a>
-            </li>
-            {% else %}
-            <li class="active">
-                <a href="/search?location_name={{location_name}}&food_name&{{food_name}}&page={{page}}">{{page}}</a>
-            </li>
-            {% endif %}
-
-            {% endfor %}
-          </ul>
-        </nav>
-
-        <ul class="media-list">
-            {% for entry in posts %}
-            <li class="media">
-                <div class="media-left">
-                    <a href="{{'/post/' + entry.insta_id}}">
-                        <img class="media-object" src="{{entry.insta_img_thumb}}" alt="thumbnail">
-                    </a>
-                </div>
-                <div class="media-body">
-                    <h4 class="media-heading">
-                    {% if entry.food_name %}
-                        {{ entry.food_name }}
-                    {% else %}
-                        {{entry.insta_text[0:15] + "..."}}
-                    {% endif %}
-                     @ {{entry.insta_loc_name}}
-                    </h4>
-                    <p>{{entry.insta_text}}</p>
-                    <p>{{entry.username}}</p>
-                    <a class="btn btn-primary" href="{{"/post/" + entry.insta_id}}">Open Post</a>
-                </div>
-            </li>
-            {% endfor %}
-        </ul>
-
         <nav aria-label="Page navigation">
           <ul class="pagination">
             {% for page in pagination.iter_pages() %}
@@ -87,22 +54,65 @@
             </li>
             {% elif page != pagination.page %}
             <li>
-              <a href="/search?location_name={{location_name}}&food_name&{{food_name}}&page={{page}}" aria-label="Previous">
+              <a href="/feed?page={{page}}{{query_string}}" aria-label="Page {{page}}">
                 <span aria-hidden="true">{{page}}</span>
               </a>
             </li>
             {% else %}
             <li class="active">
-                <a href="/search?location_name={{location_name}}&food_name&{{food_name}}&page={{page}}">{{page}}</a>
+                <a href="/feed?page={{page}}{{query_string}}">{{page}}</a>
             </li>
             {% endif %}
-            
+
             {% endfor %}
           </ul>
         </nav>
+
+        {% for entry_row in posts | batch(3) %}
+        <div class="row feed-row">
+            {% for entry in entry_row %}
+            <div class="col-sm-4 col-md-4">
+                <a href="{{'/post/' + entry.insta_id}}" class="list-group-item feed-item">
+                    <img class="media-object center-image" src="{{entry.insta_img_med}}" alt="thumbnail">
+                    <p class="list-group-item-text feed-item-name">
+                        {% if entry.food_name %}
+                            {{ entry.food_name }}
+                        {% else %}
+                            {{entry.insta_text[0:15] + "..."}}
+                        {% endif %}
+                         @ {{entry.insta_loc_name}}
+                    </p>
+                </a>
+            </div>
+            {% endfor %}
         </div>
+        {% endfor %}
+
+        <nav aria-label="Page navigation">
+          <ul class="pagination">
+            {% for page in pagination.iter_pages() %}
+
+            {% if page == None %}
+            <li>
+                <a href="/">...</a>
+            </li>
+            {% elif page != pagination.page %}
+            <li>
+              <a href="/feed?page={{page}}{{query_string}}" aria-label="Page {{page}}">
+                <span aria-hidden="true">{{page}}</span>
+              </a>
+            </li>
+            {% else %}
+            <li class="active">
+                <a href="/feed?page={{page}}{{query_string}}">{{page}}</a>
+            </li>
+            {% endif %}
+
+            {% endfor %}
+          </ul>
+        </nav>
     </div>
 
 </body>
- 
+
 </html>
