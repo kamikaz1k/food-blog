@@ -20,7 +20,7 @@ app.secret_key = os.environ.get('SECRET_KEY', 'a_sekret_key')
 
 # MySQL configurations
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-app.config['SQLALCHEMY_POOL_RECYCLE'] = os.environ['DATABASE_POOL_RECYCLE']
+app.config['SQLALCHEMY_POOL_RECYCLE'] = int(os.environ['DATABASE_POOL_RECYCLE'])
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['WORKER_QUEUE'] = []
 app.config['WORKER_RUNNING'] = False
