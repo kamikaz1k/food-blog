@@ -16,6 +16,17 @@
         background-color: lightblue;
         border-radius: 5px;
       }
+      .post-img {
+        width: 100%;
+      }
+      .food-caption {
+        margin-top: 15px;
+        margin-bottom: 35px;
+      }
+      .subcaption {
+        text-align: right;
+        margin-bottom: 35px;
+      }
       </style>
 </head>
 
@@ -32,7 +43,7 @@
     <div class="container">
 
       <div class="row">
-        <div class="col-md-8 col-md-offset-2" style="text-align:center;">
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 col-lg-offset-3 col-md-offset-3 col-sm-offset-3 " style="text-align:center;">
           <h2>
             {% if food_name %}
                 {{ food_name }}
@@ -40,10 +51,9 @@
                 {{food_caption[0:15] + "..."}}
             {% endif %} @ <span><a class="location-link" href="/search?location_name={{location_name|urlencode}}">{{location_name}}</a></span>
           </h2>
-          <img src="{{image_link}}" style="width: 100%; max-width:320px;">
-          <br><br>
-          <p>{{food_caption}}</p>
-          <p class="text-muted" style="text-align:right;font-style:italic;">Tasted on: {{post_date}}<br>Posted by: <a href="https://www.instagram.com/{{username}}/">{{username}}<a/></p>
+          <img class="post-img" src="{{image_link}}">
+          <p class="food-caption">{{food_caption}}</p>
+          <p class="text-muted subcaption">Tasted on: {{post_date}}<br>Posted by: <a href="https://www.instagram.com/{{username}}/">{{username}}<a/></p>
           <a class="btn btn-primary" href="https://www.instagram.com/p/{{post_id}}/">Open in Instagram</a>
         </div>
       </div>
